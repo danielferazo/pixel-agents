@@ -93,7 +93,7 @@ export function readNewLines(
 export function ensureProjectScan(
 	projectDir: string,
 	knownJsonlFiles: Set<string>,
-	projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+	projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
 	activeAgentIdRef: { current: number | null },
 	nextAgentIdRef: { current: number },
 	agents: Map<number, AgentState>,
@@ -104,7 +104,8 @@ export function ensureProjectScan(
 	webview: vscode.Webview | undefined,
 	persistAgents: () => void,
 ): void {
-	if (projectScanTimerRef.current) return;
+	// Guard per-directory: each project dir gets its own scan timer
+	if (projectScanTimers.has(projectDir)) return;
 	// Seed with all existing JSONL files so we only react to truly new ones
 	try {
 		const files = fs.readdirSync(projectDir)
@@ -115,13 +116,14 @@ export function ensureProjectScan(
 		}
 	} catch { /* dir may not exist yet */ }
 
-	projectScanTimerRef.current = setInterval(() => {
+	const timer = setInterval(() => {
 		scanForNewJsonlFiles(
 			projectDir, knownJsonlFiles, activeAgentIdRef, nextAgentIdRef,
 			agents, fileWatchers, pollingTimers, waitingTimers, permissionTimers,
 			webview, persistAgents,
 		);
 	}, PROJECT_SCAN_INTERVAL_MS);
+	projectScanTimers.set(projectDir, timer);
 }
 
 function scanForNewJsonlFiles(

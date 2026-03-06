@@ -9,10 +9,11 @@ import {
 	restoreAgents,
 	persistAgents,
 	sendExistingAgents,
+	sendCurrentAgentStatuses,
 	sendLayout,
 	getProjectDirPath,
 } from './agentManager.js';
-import { ensureProjectScan } from './fileWatcher.js';
+import { ensureProjectScan, readNewLines } from './fileWatcher.js';
 import { loadFurnitureAssets, sendAssetsToWebview, loadFloorTiles, sendFloorTilesToWebview, loadWallTiles, sendWallTilesToWebview, loadCharacterSprites, sendCharacterSpritesToWebview, loadDefaultLayout } from './assetLoader.js';
 import { WORKSPACE_KEY_AGENT_SEATS, GLOBAL_KEY_SOUND_ENABLED } from './constants.js';
 import { writeLayoutToFile, readLayoutFromFile, watchLayoutFile } from './layoutPersistence.js';
@@ -31,10 +32,10 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 	jsonlPollTimers = new Map<number, ReturnType<typeof setInterval>>();
 	permissionTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
-	// /clear detection: project-level scan for new JSONL files
+	// /clear detection: project-level scan for new JSONL files (one timer per project dir)
 	activeAgentId = { current: null as number | null };
 	knownJsonlFiles = new Set<string>();
-	projectScanTimer = { current: null as ReturnType<typeof setInterval> | null };
+	projectScanTimers = new Map<string, ReturnType<typeof setInterval>>();
 
 	// Bundled default layout (loaded from assets/default-layout.json)
 	defaultLayout: Record<string, unknown> | null = null;
@@ -67,7 +68,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 					this.nextAgentId, this.nextTerminalIndex,
 					this.agents, this.activeAgentId, this.knownJsonlFiles,
 					this.fileWatchers, this.pollingTimers, this.waitingTimers, this.permissionTimers,
-					this.jsonlPollTimers, this.projectScanTimer,
+					this.jsonlPollTimers, this.projectScanTimers,
 					this.webview, this.persistAgents,
 					message.folderPath as string | undefined,
 				);
@@ -96,7 +97,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 					this.nextAgentId, this.nextTerminalIndex,
 					this.agents, this.knownJsonlFiles,
 					this.fileWatchers, this.pollingTimers, this.waitingTimers, this.permissionTimers,
-					this.jsonlPollTimers, this.projectScanTimer, this.activeAgentId,
+					this.jsonlPollTimers, this.projectScanTimers, this.activeAgentId,
 					this.webview, this.persistAgents,
 				);
 				// Send persisted settings to webview
@@ -119,7 +120,7 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				console.log('[Extension] projectDir:', projectDir);
 				if (projectDir) {
 					ensureProjectScan(
-						projectDir, this.knownJsonlFiles, this.projectScanTimer, this.activeAgentId,
+						projectDir, this.knownJsonlFiles, this.projectScanTimers, this.activeAgentId,
 						this.nextAgentId, this.agents,
 						this.fileWatchers, this.pollingTimers, this.waitingTimers, this.permissionTimers,
 						this.webview, this.persistAgents,
@@ -293,6 +294,16 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				}
 			}
 		});
+
+		// When the panel becomes visible after being hidden, catch up on any missed
+		// transcript data and re-sync agent statuses to the webview.
+		webviewView.onDidChangeVisibility(() => {
+			if (!webviewView.visible) return;
+			for (const [id] of this.agents) {
+				readNewLines(id, this.agents, this.waitingTimers, this.permissionTimers, this.webview);
+			}
+			sendCurrentAgentStatuses(this.agents, this.webview);
+		});
 	}
 
 	/** Export current saved layout to webview-ui/public/assets/default-layout.json (dev utility) */
@@ -331,10 +342,10 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				this.jsonlPollTimers, this.persistAgents,
 			);
 		}
-		if (this.projectScanTimer.current) {
-			clearInterval(this.projectScanTimer.current);
-			this.projectScanTimer.current = null;
+		for (const timer of this.projectScanTimers.values()) {
+			clearInterval(timer);
 		}
+		this.projectScanTimers.clear();
 	}
 }
 

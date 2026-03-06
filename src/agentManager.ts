@@ -28,7 +28,7 @@ export async function launchNewTerminal(
 	waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
 	permissionTimers: Map<number, ReturnType<typeof setTimeout>>,
 	jsonlPollTimers: Map<number, ReturnType<typeof setInterval>>,
-	projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+	projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
 	webview: vscode.Webview | undefined,
 	persistAgents: () => void,
 	folderPath?: string,
@@ -84,7 +84,7 @@ export async function launchNewTerminal(
 	webview?.postMessage({ type: 'agentCreated', id, folderName });
 
 	ensureProjectScan(
-		projectDir, knownJsonlFiles, projectScanTimerRef, activeAgentIdRef,
+		projectDir, knownJsonlFiles, projectScanTimers, activeAgentIdRef,
 		nextAgentIdRef, agents, fileWatchers, pollingTimers, waitingTimers, permissionTimers,
 		webview, persistAgents,
 	);
@@ -167,7 +167,7 @@ export function restoreAgents(
 	waitingTimers: Map<number, ReturnType<typeof setTimeout>>,
 	permissionTimers: Map<number, ReturnType<typeof setTimeout>>,
 	jsonlPollTimers: Map<number, ReturnType<typeof setInterval>>,
-	projectScanTimerRef: { current: ReturnType<typeof setInterval> | null },
+	projectScanTimers: Map<string, ReturnType<typeof setInterval>>,
 	activeAgentIdRef: { current: number | null },
 	webview: vscode.Webview | undefined,
 	doPersist: () => void,
@@ -255,7 +255,7 @@ export function restoreAgents(
 	// Start project scan for /clear detection
 	if (restoredProjectDir) {
 		ensureProjectScan(
-			restoredProjectDir, knownJsonlFiles, projectScanTimerRef, activeAgentIdRef,
+			restoredProjectDir, knownJsonlFiles, projectScanTimers, activeAgentIdRef,
 			nextAgentIdRef, agents, fileWatchers, pollingTimers, waitingTimers, permissionTimers,
 			webview, doPersist,
 		);

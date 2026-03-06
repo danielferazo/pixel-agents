@@ -16,6 +16,11 @@ interface ToolOverlayProps {
   onCloseAgent: (id: number) => void
 }
 
+/** Replace hyphens with spaces for display — "venue-researcher" → "venue researcher" */
+function formatName(text: string): string {
+  return text.replace(/-/g, ' ')
+}
+
 /** Derive a short human-readable activity string from tools/status */
 function getActivityText(
   agentId: number,
@@ -105,10 +110,10 @@ export function ToolOverlay({
             activityText = 'Needs approval'
           } else {
             const sub = subagentCharacters.find((s) => s.id === id)
-            activityText = sub ? sub.label : 'Subtask'
+            activityText = formatName(sub ? sub.label : 'Subtask')
           }
         } else {
-          activityText = getActivityText(id, agentTools, ch.isActive)
+          activityText = formatName(getActivityText(id, agentTools, ch.isActive))
         }
 
         // Determine dot color
@@ -190,7 +195,7 @@ export function ToolOverlay({
                       display: 'block',
                     }}
                   >
-                    {ch.folderName}
+                    {formatName(ch.folderName)}
                   </span>
                 )}
               </div>
