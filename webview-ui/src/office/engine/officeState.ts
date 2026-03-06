@@ -4,6 +4,9 @@ import {
   HUE_SHIFT_MIN_DEG,
   HUE_SHIFT_RANGE_DEG,
   WAITING_BUBBLE_DURATION_SEC,
+  SUCCESS_BUBBLE_DURATION_SEC,
+  ERROR_BUBBLE_DURATION_SEC,
+  WAITING_ON_HUMAN_BUBBLE_DURATION_SEC,
   DISMISS_BUBBLE_FAST_FADE_SEC,
   INACTIVE_SEAT_TIMER_MIN_SEC,
   INACTIVE_SEAT_TIMER_RANGE_SEC,
@@ -600,14 +603,46 @@ export class OfficeState {
     }
   }
 
-  /** Dismiss bubble on click — permission: instant, waiting: quick fade */
+  showThinkingBubble(id: number): void {
+    const ch = this.characters.get(id)
+    if (ch) {
+      ch.bubbleType = 'thinking'
+      ch.bubbleTimer = 0
+    }
+  }
+
+  showSuccessBubble(id: number): void {
+    const ch = this.characters.get(id)
+    if (ch) {
+      ch.bubbleType = 'success'
+      ch.bubbleTimer = SUCCESS_BUBBLE_DURATION_SEC
+    }
+  }
+
+  showErrorBubble(id: number): void {
+    const ch = this.characters.get(id)
+    if (ch) {
+      ch.bubbleType = 'error'
+      ch.bubbleTimer = ERROR_BUBBLE_DURATION_SEC
+    }
+  }
+
+  showWaitingOnHumanBubble(id: number): void {
+    const ch = this.characters.get(id)
+    if (ch) {
+      ch.bubbleType = 'waiting_on_human'
+      ch.bubbleTimer = WAITING_ON_HUMAN_BUBBLE_DURATION_SEC
+    }
+  }
+
+  /** Dismiss bubble on click — permission: instant, waiting/success/error: quick fade */
   dismissBubble(id: number): void {
     const ch = this.characters.get(id)
     if (!ch || !ch.bubbleType) return
-    if (ch.bubbleType === 'permission') {
+    if (ch.bubbleType === 'permission' || ch.bubbleType === 'thinking') {
       ch.bubbleType = null
       ch.bubbleTimer = 0
-    } else if (ch.bubbleType === 'waiting') {
+    } else if (ch.bubbleType === 'waiting' || ch.bubbleType === 'success' || ch.bubbleType === 'error' || ch.bubbleType === 'waiting_on_human') {
       // Trigger immediate fade (0.3s remaining)
       ch.bubbleTimer = Math.min(ch.bubbleTimer, DISMISS_BUBBLE_FAST_FADE_SEC)
     }
@@ -638,8 +673,8 @@ export class OfficeState {
         updateCharacter(ch, dt, this.walkableTiles, this.seats, this.tileMap, this.blockedTiles)
       )
 
-      // Tick bubble timer for waiting bubbles
-      if (ch.bubbleType === 'waiting') {
+      // Tick bubble timer for timed bubbles (waiting, success, error, waiting_on_human)
+      if (ch.bubbleType === 'waiting' || ch.bubbleType === 'success' || ch.bubbleType === 'error' || ch.bubbleType === 'waiting_on_human') {
         ch.bubbleTimer -= dt
         if (ch.bubbleTimer <= 0) {
           ch.bubbleType = null

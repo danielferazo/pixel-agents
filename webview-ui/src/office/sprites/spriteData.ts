@@ -318,6 +318,94 @@ export const BUBBLE_WAITING_SPRITE: SpriteData = (() => {
   ]
 })()
 
+/** Thinking bubble: light blue cloud with "..." in darker blue (11x13) */
+export const BUBBLE_THINKING_SPRITE: SpriteData = (() => {
+  const B = '#555566' // border
+  const F = '#E8F4FF' // fill - light blue
+  const D = '#4488CC' // dots - darker blue
+  return [
+    [_, _, B, B, B, B, B, B, B, _, _],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, D, F, F, F, D, F, F, B],
+    [B, F, F, F, F, D, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [_, B, B, F, F, F, F, F, B, B, _],
+    [_, _, _, B, B, B, B, B, _, _, _],
+    [_, _, _, _, B, B, B, _, _, _, _],
+    [_, _, _, _, _, B, _, _, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _],
+  ]
+})()
+
+/** Success bubble: white square with gold star (11x13) */
+export const BUBBLE_SUCCESS_SPRITE: SpriteData = (() => {
+  const B = '#555566' // border
+  const F = '#EEEEFF' // fill
+  const G = '#FFD700' // gold star
+  return [
+    [_, _, _, B, B, B, B, B, _, _, _],
+    [_, B, B, F, F, F, F, F, B, B, _],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, G, G, F, F, F, B],
+    [B, F, F, F, G, G, G, G, F, F, B],
+    [B, F, F, G, G, G, G, G, G, F, B],
+    [B, F, F, F, G, G, G, G, F, F, B],
+    [B, F, F, F, F, G, G, F, F, F, B],
+    [_, B, B, F, F, F, F, F, B, B, _],
+    [_, _, _, B, B, B, B, B, _, _, _],
+    [_, _, _, _, B, B, B, _, _, _, _],
+    [_, _, _, _, _, B, _, _, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _],
+  ]
+})()
+
+/** Error bubble: white square with red exclamation (11x13) */
+export const BUBBLE_ERROR_SPRITE: SpriteData = (() => {
+  const B = '#555566' // border
+  const F = '#EEEEFF' // fill
+  const R = '#DD4444' // red exclamation
+  return [
+    [_, _, B, B, B, B, B, B, B, _, _],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, R, R, R, F, F, F, B],
+    [B, F, F, F, R, R, R, F, F, F, B],
+    [B, F, F, F, R, R, R, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [_, B, B, B, B, B, B, B, B, B, _],
+    [_, _, _, _, B, B, B, _, _, _, _],
+    [_, _, _, _, B, B, B, _, _, _, _],
+    [_, _, _, _, _, B, _, _, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _],
+  ]
+})()
+
+/** Waiting on human bubble: white square with purple hourglass (11x13) */
+export const BUBBLE_WAITING_HUMAN_SPRITE: SpriteData = (() => {
+  const B = '#555566' // border
+  const F = '#EEEEFF' // fill
+  const P = '#9966CC' // purple hourglass
+  return [
+    [_, _, B, B, B, B, B, B, B, _, _],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, F, F, F, F, F, F, F, B],
+    [B, F, F, P, P, P, P, P, F, F, B],
+    [B, F, F, P, P, P, P, P, F, F, B],
+    [B, F, F, F, P, P, P, F, F, F, B],
+    [B, F, F, F, P, P, P, F, F, F, B],
+    [B, F, F, P, P, P, P, P, F, F, B],
+    [_, B, B, F, F, F, F, F, B, B, _],
+    [_, _, _, B, B, B, B, B, _, _, _],
+    [_, _, _, _, B, B, B, _, _, _, _],
+    [_, _, _, _, _, B, _, _, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _],
+  ]
+})()
+
 // ── Character Sprites ───────────────────────────────────────────
 // 16x24 characters with palette substitution
 
