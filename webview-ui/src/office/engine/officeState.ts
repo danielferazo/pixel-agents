@@ -162,10 +162,55 @@ export class OfficeState {
     return result
   }
 
-  private findFreeSeat(): string | null {
-    for (const [uid, seat] of this.seats) {
-      if (!seat.assigned) return uid
+  /** Find a free seat, preferring seats near agents with the same folderName (project) */
+  private findFreeSeat(folderName?: string): string | null {
+    // If no folderName or no existing agents with this folderName, find any free seat
+    if (!folderName) {
+      for (const [uid, seat] of this.seats) {
+        if (!seat.assigned) return uid
+      }
+      return null
     }
+
+    // Find agents with the same project
+    const sameProjectAgents: Character[] = []
+    for (const ch of this.characters.values()) {
+      if (ch.folderName === folderName && ch.seatId) {
+        sameProjectAgents.push(ch)
+      }
+    }
+
+    // If no other agents from this project, find any free seat
+    if (sameProjectAgents.length === 0) {
+      for (const [uid, seat] of this.seats) {
+        if (!seat.assigned) return uid
+      }
+      return null
+    }
+
+    // Find seats near agents from the same project (prefer same table)
+    const seatCandidates: Array<{ uid: string; seat: Seat; distance: number }> = []
+    for (const [uid, seat] of this.seats) {
+      if (seat.assigned) continue
+
+      // Calculate distance to each same-project agent
+      let minDistance = Infinity
+      for (const agent of sameProjectAgents) {
+        const dist = Math.abs(seat.seatCol - agent.tileCol) + Math.abs(seat.seatRow - agent.tileRow)
+        minDistance = Math.min(minDistance, dist)
+      }
+
+      seatCandidates.push({ uid, seat, distance: minDistance })
+    }
+
+    // Sort by distance (prefer closer seats)
+    seatCandidates.sort((a, b) => a.distance - b.distance)
+
+    // Return the closest seat
+    if (seatCandidates.length > 0) {
+      return seatCandidates[0].uid
+    }
+
     return null
   }
 
