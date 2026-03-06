@@ -279,15 +279,25 @@ export function createDefaultLayout(): OfficeLayout {
   }
 
   const furniture: PlacedFurniture[] = [
-    { uid: 'desk-left', type: FurnitureType.DESK, col: 4, row: 3 },
-    { uid: 'desk-right', type: FurnitureType.DESK, col: 13, row: 3 },
-    { uid: 'bookshelf-1', type: FurnitureType.BOOKSHELF, col: 1, row: 5 },
-    { uid: 'plant-left', type: FurnitureType.PLANT, col: 1, row: 1 },
-    { uid: 'cooler-1', type: FurnitureType.COOLER, col: 17, row: 7 },
-    { uid: 'plant-right', type: FurnitureType.PLANT, col: 18, row: 1 },
-    { uid: 'whiteboard-1', type: FurnitureType.WHITEBOARD, col: 15, row: 0 },
-    // Round table - seats 10 people in a circle
-    { uid: 'round-table-1', type: FurnitureType.ROUND_TABLE, col: 9, row: 4 },
+    // Round tables for teams - spread across the office (fits 20x11 grid)
+    // Top-left area - Team Alpha
+    { uid: 'round-table-alpha', type: FurnitureType.ROUND_TABLE, col: 4, row: 3 },
+    // Top-right area - Team Beta
+    { uid: 'round-table-beta', type: FurnitureType.ROUND_TABLE, col: 13, row: 3 },
+    // Middle - Team Gamma (center)
+    { uid: 'round-table-gamma', type: FurnitureType.ROUND_TABLE, col: 9, row: 7 },
+    // Bottom-left - Team Delta
+    { uid: 'round-table-delta', type: FurnitureType.ROUND_TABLE, col: 4, row: 9 },
+    // Bottom-right - Team Epsilon
+    { uid: 'round-table-epsilon', type: FurnitureType.ROUND_TABLE, col: 13, row: 9 },
+    // Decor - water coolers and plants
+    { uid: 'cooler-1', type: FurnitureType.COOLER, col: 1, row: 5 },
+    { uid: 'cooler-2', type: FurnitureType.COOLER, col: 17, row: 5 },
+    { uid: 'plant-1', type: FurnitureType.PLANT, col: 1, row: 1 },
+    { uid: 'plant-2', type: FurnitureType.PLANT, col: 17, row: 1 },
+    // Whiteboards for collaboration
+    { uid: 'whiteboard-1', type: FurnitureType.WHITEBOARD, col: 0, row: 5 },
+    { uid: 'whiteboard-2', type: FurnitureType.WHITEBOARD, col: 18, row: 5 },
   ]
 
   return { version: 1, cols: DEFAULT_COLS, rows: DEFAULT_ROWS, tiles, tileColors, furniture }
