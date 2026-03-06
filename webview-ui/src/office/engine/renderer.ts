@@ -1,7 +1,7 @@
 import { TileType, TILE_SIZE, CharacterState } from '../types.js'
 import type { TileType as TileTypeVal, FurnitureInstance, Character, SpriteData, Seat, FloorColor } from '../types.js'
 import { getCachedSprite, getOutlineSprite } from '../sprites/spriteCache.js'
-import { getCharacterSprites, BUBBLE_PERMISSION_SPRITE, BUBBLE_WAITING_SPRITE, BUBBLE_THINKING_SPRITE, BUBBLE_SUCCESS_SPRITE, BUBBLE_ERROR_SPRITE, BUBBLE_WAITING_HUMAN_SPRITE } from '../sprites/spriteData.js'
+import { getCharacterSprites, BUBBLE_PERMISSION_SPRITE, BUBBLE_WAITING_SPRITE, BUBBLE_THINKING_SPRITE, BUBBLE_SUCCESS_SPRITE, BUBBLE_ERROR_SPRITE, BUBBLE_WAITING_HUMAN_SPRITE, CROWN_BADGE_SPRITE } from '../sprites/spriteData.js'
 import { getCharacterSprite } from './characters.js'
 import { renderMatrixEffect } from './matrixEffect.js'
 import { getColorizedFloorSprite, hasFloorSprites, WALL_COLOR } from '../floorTiles.js'
@@ -183,6 +183,68 @@ export function renderScene(
 
   for (const d of drawables) {
     d.draw(ctx)
+  }
+}
+
+// ── Collaboration Lines ──────────────────────────────────────────
+
+const COLLABORATION_LINE_COLOR = 'rgba(100, 150, 255, 0.6)'
+const COLLABORATION_LINE_WIDTH = 2
+
+export function renderCollaborationLines(
+  ctx: CanvasRenderingContext2D,
+  characters: Character[],
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  // Build a map of parent -> children
+  const parentToChildren = new Map<number, number[]>()
+  for (const ch of characters) {
+    if (ch.isSubagent && ch.parentAgentId !== null) {
+      const existing = parentToChildren.get(ch.parentAgentId) || []
+      existing.push(ch.id)
+      parentToChildren.set(ch.parentAgentId, existing)
+    }
+  }
+
+  // Draw lines from parent to each sub-agent
+  for (const ch of characters) {
+    const children = parentToChildren.get(ch.id)
+    if (!children || children.length === 0) continue
+
+    // Get parent position (character anchor point)
+    const parentX = offsetX + ch.x * zoom
+    const parentY = offsetY + (ch.y - 28) * zoom // Above the character's head
+
+    for (const childId of children) {
+      const child = characters.find(c => c.id === childId)
+      if (!child) continue
+
+      const childX = offsetX + child.x * zoom
+      const childY = offsetY + (child.y - 28) * zoom
+
+      // Draw dotted line
+      ctx.save()
+      ctx.strokeStyle = COLLABORATION_LINE_COLOR
+      ctx.lineWidth = COLLABORATION_LINE_WIDTH * zoom
+      ctx.setLineDash([4 * zoom, 4 * zoom])
+      ctx.beginPath()
+      ctx.moveTo(parentX, parentY)
+      ctx.lineTo(childX, childY)
+      ctx.stroke()
+      ctx.restore()
+    }
+  }
+
+  // Draw crown badges on parent agents
+  const crownCached = getCachedSprite(CROWN_BADGE_SPRITE, zoom)
+  for (const ch of characters) {
+    if (parentToChildren.has(ch.id)) {
+      const crownX = Math.round(offsetX + ch.x * zoom - crownCached.width / 2)
+      const crownY = Math.round(offsetY + (ch.y - 36) * zoom - crownCached.height)
+      ctx.drawImage(crownCached, crownX, crownY)
+    }
   }
 }
 
@@ -593,6 +655,9 @@ export function renderFrame(
   const selectedId = selection?.selectedAgentId ?? null
   const hoveredId = selection?.hoveredAgentId ?? null
   renderScene(ctx, allFurniture, characters, offsetX, offsetY, zoom, selectedId, hoveredId)
+
+  // Collaboration lines between parent and sub-agents (on top of characters, below bubbles)
+  renderCollaborationLines(ctx, characters, offsetX, offsetY, zoom)
 
   // Speech bubbles (always on top of characters)
   renderBubbles(ctx, characters, offsetX, offsetY, zoom)

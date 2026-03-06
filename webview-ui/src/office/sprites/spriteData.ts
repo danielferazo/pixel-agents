@@ -406,6 +406,21 @@ export const BUBBLE_WAITING_HUMAN_SPRITE: SpriteData = (() => {
   ]
 })()
 
+/** Crown badge: small golden crown for parent agents (9x7) */
+export const CROWN_BADGE_SPRITE: SpriteData = (() => {
+  const G = '#FFD700' // gold
+  const O = '#FFA500' // orange outline
+  return [
+    [_, _, _, O, O, O, O, O, _],
+    [_, O, G, G, G, G, G, O, _],
+    [O, G, G, G, G, G, G, G, O],
+    [O, G, G, G, G, G, G, G, O],
+    [O, G, G, G, G, G, G, G, O],
+    [_, O, G, G, O, O, G, O, _],
+    [_, _, O, O, _, _, O, O, _],
+  ]
+})()
+
 // ── Character Sprites ───────────────────────────────────────────
 // 16x24 characters with palette substitution
 
