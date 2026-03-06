@@ -78,7 +78,8 @@ export function AgentLabels({
           dotColor = 'var(--vscode-charts-blue, #3794ff)'
         }
 
-        const labelText = subLabelMap.get(id) || ch.folderName || `Agent #${id}`
+        // Show folderName (project) if available, otherwise show "Active Agent"
+        const labelText = subLabelMap.get(id) || ch.folderName || 'Active Agent'
 
         return (
           <div

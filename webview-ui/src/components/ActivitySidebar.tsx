@@ -111,20 +111,29 @@ export function ActivitySidebar({
     borderRadius: 0,
   }
 
-  // Get agent name from tools (use first tool's name as fallback)
+  // Get agent name - show status instead of tool ID
   const getAgentName = (id: number): string => {
+    const status = agentStatuses[id]
     const tools = agentTools[id]
+
+    // If there's an active tool, show its status
     if (tools && tools.length > 0) {
-      // Use the first incomplete tool's name, or the first tool's name
       const activeTool = tools.find(t => !t.done)
-      if (activeTool?.toolId) {
-        return activeTool.toolId
+      if (activeTool?.status) {
+        // Truncate long status messages
+        const statusText = activeTool.status
+        if (statusText.length > 25) {
+          return statusText.substring(0, 22) + '...'
+        }
+        return statusText
       }
-      if (tools[0]?.toolId) {
-        return tools[0].toolId
+      // If all tools done, show completed
+      if (status === 'waiting') {
+        return 'Waiting...'
       }
     }
-    return `Agent ${id}`
+
+    return 'Active'
   }
 
   return (
