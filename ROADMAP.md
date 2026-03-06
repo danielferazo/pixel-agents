@@ -33,7 +33,7 @@
 - Pixel agents server auto-starts on login, restarts on crash
 - Dedicated port **7890** — one permanent browser tab, all agents across all projects
 - Logs to `~/.claude/logs/pixel-agents.log`
-- **Next:** package this setup as a one-command install script so any new machine is set up in seconds
+- **`install.sh`** — one-command setup: detects Node (nvm/homebrew/system), installs deps, builds webview, writes LaunchAgent with correct paths, starts service, opens browser
 
 ---
 
@@ -57,10 +57,6 @@
 ### Notifications
 - Browser desktop notification when an agent needs approval (permission bubble)
 - Optional Slack bridge: post to a channel when an agent completes a turn or hits a blocker
-
-### One-Command Install
-- `install.sh` that sets up the LaunchAgent, verifies Node path, builds the project, and opens `localhost:7890`
-- Works on a fresh machine with no VS Code required
 
 ### Mobile View
 - Responsive layout for monitoring from phone or tablet
