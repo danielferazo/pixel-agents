@@ -35,7 +35,7 @@ const SETTINGS_FILE = path.join(LAYOUT_DIR, 'settings.json')
 
 // ── Config ────────────────────────────────────────────────────
 // Only track JSONL files modified within this many days (0 = all time)
-const RECENT_DAYS = Number(process.env.PIXEL_AGENTS_RECENT_DAYS ?? 7)
+const RECENT_DAYS = Number(process.env.PIXEL_AGENTS_RECENT_DAYS ?? 30)
 const RECENT_MS = RECENT_DAYS > 0 ? RECENT_DAYS * 24 * 60 * 60 * 1000 : Infinity
 const MIN_FILE_SIZE = 200  // bytes — skip trivially empty sessions
 
@@ -131,8 +131,9 @@ function getReadableProjectName(hashedDir) {
   // Strip leading/trailing dashes
   name = name.replace(/^-+|-+$/g, '')
 
-  // Empty → home directory
-  return name || 'home'
+  // Empty → session ran from home dir (Jarvis general tasks, research, skills)
+  // Replace remaining dashes with spaces for readability
+  return (name || 'jarvis').replace(/-/g, ' ')
 }
 
 // ── Layout persistence (ported from layoutPersistence.ts) ─────
