@@ -39,6 +39,18 @@
 
 ## Planned 📋
 
+### Large-Scale Office Layout
+- `scripts/generate-office-layout.js` — programmatically generates a 64×34 office
+- **105 workstations**: 21 desks per row × 5 pod rows, each desk spaced 3 tiles apart
+- Three zones: warm-toned work area (rows 1–16), golden accent corridor (rows 17–19), cool slate-blue lounge (rows 20–32)
+- Whiteboards, bookshelves, water coolers, plants, and lamps throughout
+- Writes directly to `~/.pixel-agents/layout.json` so the live server hot-reloads instantly
+- Run: `npm run generate-layout`
+
+---
+
+## Planned 📋
+
 ### Better Agent Identity
 - Show the actual Jarvis skill name on the character label (e.g. `venue-researcher`, `cto`, `qa-auditor`)
 - Show which project each agent is working on beneath the skill name

@@ -62,7 +62,8 @@
     "import-tileset": "tsx scripts/import-tileset-cli.ts",
     "build:standalone": "cd webview-ui && npm run build",
     "start:standalone": "cd standalone && npm install --silent && node server.js",
-    "standalone": "npm run build:standalone && npm run start:standalone"
+    "standalone": "npm run build:standalone && npm run start:standalone",
+    "generate-layout": "node scripts/generate-office-layout.js"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
