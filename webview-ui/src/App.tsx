@@ -14,6 +14,7 @@ import { useEditorKeyboard } from './hooks/useEditorKeyboard.js'
 import { ZoomControls } from './components/ZoomControls.js'
 import { BottomToolbar } from './components/BottomToolbar.js'
 import { DebugView } from './components/DebugView.js'
+import { ActivitySidebar } from './components/ActivitySidebar.js'
 
 // Game state lives outside React — updated imperatively by message handlers
 const officeStateRef = { current: null as OfficeState | null }
@@ -124,8 +125,10 @@ function App() {
   const { agents, selectedAgent, agentTools, agentStatuses, subagentTools, subagentCharacters, layoutReady, loadedAssets, workspaceFolders } = useExtensionMessages(getOfficeState, editor.setLastSavedLayout, isEditDirty)
 
   const [isDebugMode, setIsDebugMode] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const handleToggleDebugMode = useCallback(() => setIsDebugMode((prev) => !prev), [])
+  const handleToggleSidebar = useCallback(() => setIsSidebarOpen((prev) => !prev), [])
 
   const handleSelectAgent = useCallback((id: number) => {
     vscode.postMessage({ type: 'focusAgent', id })
@@ -306,6 +309,16 @@ function App() {
           onSelectAgent={handleSelectAgent}
         />
       )}
+
+      <ActivitySidebar
+        agentIds={agents}
+        agentTools={agentTools}
+        agentStatuses={agentStatuses}
+        isOpen={isSidebarOpen}
+        onToggle={handleToggleSidebar}
+        onSelectAgent={handleSelectAgent}
+        onCloseAgent={handleCloseAgent}
+      />
     </div>
   )
 }
