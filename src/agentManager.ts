@@ -58,7 +58,8 @@ export async function launchNewTerminal(
 
 	// Create agent immediately (before JSONL file exists)
 	const id = nextAgentIdRef.current++;
-	const folderName = isMultiRoot && cwd ? path.basename(cwd) : undefined;
+	// Always send folder name for single-root; for multi-root use the specific cwd
+	const folderName = cwd ? path.basename(cwd) : undefined;
 	const agent: AgentState = {
 		id,
 		terminalRef: terminal,
