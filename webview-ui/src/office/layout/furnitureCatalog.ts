@@ -9,6 +9,7 @@ import {
   CHAIR_SPRITE,
   PC_SPRITE,
   LAMP_SPRITE,
+  ROUND_TABLE_SPRITE,
 } from '../sprites/spriteData.js'
 
 export interface LoadedAssetData {
@@ -47,6 +48,8 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
   { type: FurnitureType.CHAIR,      label: 'Chair',      footprintW: 1, footprintH: 1, sprite: CHAIR_SPRITE,        isDesk: false, category: 'chairs' },
   { type: FurnitureType.PC,         label: 'PC',         footprintW: 1, footprintH: 1, sprite: PC_SPRITE,           isDesk: false, category: 'electronics' },
   { type: FurnitureType.LAMP,       label: 'Lamp',       footprintW: 1, footprintH: 1, sprite: LAMP_SPRITE,         isDesk: false, category: 'decor' },
+  // Round table - seats 10 people in a circle
+  { type: FurnitureType.ROUND_TABLE, label: 'Round Table', footprintW: 3, footprintH: 3, sprite: ROUND_TABLE_SPRITE, isDesk: true, category: 'desks' },
 
 ]
 

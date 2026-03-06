@@ -272,6 +272,31 @@ export const LAMP_SPRITE: SpriteData = (() => {
   ]
 })()
 
+/** Round table - 3x3 footprint, seats 10 people in a circle */
+export const ROUND_TABLE_SPRITE: SpriteData = (() => {
+  const W = '#DDDDDD' // white table top
+  const L = '#BBBBBB' // lighter edge
+  const D = '#999999' // darker edge
+  const C = '#664422' // brown center
+  const P = '#448844' // green plant in center
+  return [
+    [_, _, D, D, D, D, D, D, D, D, D, D, _, _],
+    [D, W, W, W, W, W, W, W, W, W, W, W, W, D],
+    [D, W, L, L, L, L, L, L, L, L, L, L, W, D],
+    [D, W, L, C, C, C, C, C, C, C, C, C, W, D],
+    [D, W, L, C, P, P, P, P, P, P, P, C, W, D],
+    [D, W, L, C, P, P, P, P, P, P, P, C, W, D],
+    [D, W, L, C, P, P, P, P, P, P, P, C, W, D],
+    [D, W, L, C, P, P, P, P, P, P, P, C, W, D],
+    [D, W, L, C, C, C, C, C, C, C, C, C, W, D],
+    [D, W, L, L, L, L, L, L, L, L, L, L, W, D],
+    [D, W, W, W, W, W, W, W, W, W, W, W, W, D],
+    [_, D, D, D, D, D, D, D, D, D, D, D, D, _],
+    [_, _, D, D, D, D, D, D, D, D, D, D, _, _],
+    [_, _, D, D, D, D, D, D, D, D, D, D, _, _],
+  ]
+})()
+
 // ── Speech Bubble Sprites ───────────────────────────────────────
 
 /** Permission bubble: white square with "..." in amber, and a tail pointer (11x13) */

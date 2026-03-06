@@ -91,6 +91,8 @@ export const FurnitureType = {
   CHAIR: 'chair',
   PC: 'pc',
   LAMP: 'lamp',
+  // Round table - seats 10 people in a circle
+  ROUND_TABLE: 'round_table',
 } as const
 export type FurnitureType = (typeof FurnitureType)[keyof typeof FurnitureType]
 

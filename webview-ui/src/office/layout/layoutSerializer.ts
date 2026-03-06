@@ -126,7 +126,8 @@ function orientationToFacing(orientation: string): Direction {
   }
 }
 
-/** Generate seats from chair furniture.
+/** Generate seats from chair furniture and round tables.
+ *  Round tables seat 10 people in a circle around the table.
  *  Facing priority: 1) chair orientation, 2) adjacent desk, 3) forward (DOWN). */
 export function layoutToSeats(furniture: PlacedFurniture[]): Map<string, Seat> {
   const seats = new Map<string, Seat>()
@@ -154,7 +155,40 @@ export function layoutToSeats(furniture: PlacedFurniture[]): Map<string, Seat> {
   // Multi-tile chairs (e.g. 2-tile couches) produce multiple seats.
   for (const item of furniture) {
     const entry = getCatalogEntry(item.type)
-    if (!entry || entry.category !== 'chairs') continue
+    if (!entry) continue
+
+    // Handle round tables - seat 10 people in a circle
+    if (item.type === 'round_table') {
+      const tableCenterCol = item.col + 1 // center of 3x3 table
+      const tableCenterRow = item.row + 1
+      const radius = 2 // seats go around the table at distance 2
+
+      for (let i = 0; i < 10; i++) {
+        const angle = (i * 36 - 90) * (Math.PI / 180) // -90 to start from top
+        const seatCol = Math.round(tableCenterCol + radius * Math.cos(angle))
+        const seatRow = Math.round(tableCenterRow + radius * Math.sin(angle))
+
+        // Calculate facing direction - always face the table center
+        const facingDir = angle > -Math.PI / 2 && angle < Math.PI / 2
+          ? Direction.UP
+          : angle > Math.PI / 2 || angle < -Math.PI / 2
+            ? Direction.DOWN
+            : Math.cos(angle) > 0 ? Direction.LEFT : Direction.RIGHT
+
+        const seatUid = `${item.uid}:${i}`
+        seats.set(seatUid, {
+          uid: seatUid,
+          seatCol,
+          seatRow,
+          facingDir,
+          assigned: false,
+        })
+      }
+      continue
+    }
+
+    // Regular chair handling
+    if (entry.category !== 'chairs') continue
 
     let seatCount = 0
     for (let dr = 0; dr < entry.footprintH; dr++) {
@@ -252,16 +286,8 @@ export function createDefaultLayout(): OfficeLayout {
     { uid: 'cooler-1', type: FurnitureType.COOLER, col: 17, row: 7 },
     { uid: 'plant-right', type: FurnitureType.PLANT, col: 18, row: 1 },
     { uid: 'whiteboard-1', type: FurnitureType.WHITEBOARD, col: 15, row: 0 },
-    // Left desk chairs
-    { uid: 'chair-l-top', type: FurnitureType.CHAIR, col: 4, row: 2 },
-    { uid: 'chair-l-bottom', type: FurnitureType.CHAIR, col: 5, row: 5 },
-    { uid: 'chair-l-left', type: FurnitureType.CHAIR, col: 3, row: 4 },
-    { uid: 'chair-l-right', type: FurnitureType.CHAIR, col: 6, row: 3 },
-    // Right desk chairs
-    { uid: 'chair-r-top', type: FurnitureType.CHAIR, col: 13, row: 2 },
-    { uid: 'chair-r-bottom', type: FurnitureType.CHAIR, col: 14, row: 5 },
-    { uid: 'chair-r-left', type: FurnitureType.CHAIR, col: 12, row: 4 },
-    { uid: 'chair-r-right', type: FurnitureType.CHAIR, col: 15, row: 3 },
+    // Round table - seats 10 people in a circle
+    { uid: 'round-table-1', type: FurnitureType.ROUND_TABLE, col: 9, row: 4 },
   ]
 
   return { version: 1, cols: DEFAULT_COLS, rows: DEFAULT_ROWS, tiles, tileColors, furniture }
