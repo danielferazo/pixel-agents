@@ -39,6 +39,12 @@ export const OUTLINE_Z_SORT_OFFSET = 0.001
 export const SELECTED_OUTLINE_ALPHA = 1.0
 export const HOVERED_OUTLINE_ALPHA = 0.5
 export const GHOST_PREVIEW_SPRITE_ALPHA = 0.5
+
+// Status colors for agent character outlines
+export const STATUS_COLOR_ACTIVE = '#5ac88c'     // Green - agent is working
+export const STATUS_COLOR_WAITING = '#cca700'    // Yellow - agent waiting
+export const STATUS_COLOR_PERMISSION = '#e55555' // Red - needs permission
+export const STATUS_COLOR_IDLE = '#6a6a8a'      // Gray - idle
 export const GHOST_PREVIEW_TINT_ALPHA = 0.25
 export const SELECTION_DASH_PATTERN: [number, number] = [4, 3]
 export const BUTTON_MIN_RADIUS = 6

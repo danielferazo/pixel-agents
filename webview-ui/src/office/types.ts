@@ -197,4 +197,6 @@ export interface Character {
   matrixEffectSeeds: number[]
   /** Workspace folder name (only set for multi-root workspaces) */
   folderName?: string
+  /** Current agent status for color coding: 'active', 'waiting', 'permission', 'idle' */
+  agentStatus?: 'active' | 'waiting' | 'permission' | 'idle'
 }
