@@ -93,6 +93,18 @@ export const FurnitureType = {
   LAMP: 'lamp',
   // Round table - seats 10 people in a circle
   ROUND_TABLE: 'round_table',
+  // New furniture (Studio Noir edition)
+  SOFA: 'sofa',
+  COFFEE_MACHINE: 'coffee_machine',
+  TV: 'tv',
+  ARCADE: 'arcade',
+  WINDOW: 'window',
+  FILE_CABINET: 'file_cabinet',
+  PRINTER: 'printer',
+  VENDING_MACHINE: 'vending_machine',
+  COFFEE_CUP: 'coffee_cup',
+  OPEN_LAPTOP: 'open_laptop',
+  DESK_PAPERS: 'desk_papers',
 } as const
 export type FurnitureType = (typeof FurnitureType)[keyof typeof FurnitureType]
 
@@ -115,8 +127,12 @@ export interface FurnitureCatalogEntry {
   sprite: SpriteData
   isDesk: boolean
   category?: string
+  /** Rotation/state group identifier — items sharing a groupId can be rotated or toggled */
+  groupId?: string
   /** Orientation from rotation group: 'front' | 'back' | 'left' | 'right' */
   orientation?: string
+  /** State variant: 'on' | 'off' */
+  state?: string
   /** Whether this item can be placed on top of desk/table surfaces */
   canPlaceOnSurfaces?: boolean
   /** Number of tile rows from the top of the footprint that are "background" (allow placement, still block walking). Default 0. */
@@ -134,6 +150,14 @@ export interface PlacedFurniture {
   color?: FloorColor
 }
 
+export interface ZoneLabel {
+  label: string
+  col: number
+  row: number
+  /** Optional hex color for the label text. Defaults to faint white. */
+  color?: string
+}
+
 export interface OfficeLayout {
   version: 1
   cols: number
@@ -142,6 +166,8 @@ export interface OfficeLayout {
   furniture: PlacedFurniture[]
   /** Per-tile color settings, parallel to tiles array. null = wall/no color */
   tileColors?: Array<FloorColor | null>
+  /** Zone labels rendered on the canvas floor (orientation markers) */
+  zones?: ZoneLabel[]
 }
 
 export interface Character {
@@ -161,6 +187,10 @@ export interface Character {
   moveProgress: number
   /** Current tool name for typing vs reading animation, or null */
   currentTool: string | null
+  /** Agent role for outfit styling (engineer, designer, pm, qa, researcher) */
+  role?: 'engineer' | 'designer' | 'pm' | 'qa' | 'researcher' | 'general'
+  /** Agent mood for expression (happy, neutral, stressed, celebrating, thinking, confused) */
+  mood?: 'happy' | 'neutral' | 'stressed' | 'celebrating' | 'thinking' | 'confused'
   /** Palette index (0-5) */
   palette: number
   /** Hue shift in degrees (0 = no shift, ≥45 for repeated palettes) */
@@ -199,4 +229,8 @@ export interface Character {
   folderName?: string
   /** Current agent status for color coding: 'active', 'waiting', 'permission', 'idle' */
   agentStatus?: 'active' | 'waiting' | 'permission' | 'idle'
+  /** Whether this character is an office cat (not an agent) */
+  isCat?: boolean
+  /** Cat skin variant */
+  catSkin?: 'orange' | 'black' | 'tabby' | 'white'
 }

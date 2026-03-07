@@ -8,19 +8,22 @@
 
 import type { SpriteData, FloorColor } from './types.js'
 import { getColorizedSprite, clearColorizeCache } from './colorize.js'
-import { TILE_SIZE, FALLBACK_FLOOR_COLOR } from '../constants.js'
+import { TILE_SIZE } from '../constants.js'
+import { theme } from './theme.js'
 
 /** Default solid gray 16×16 tile used when floors.png is not loaded */
 const DEFAULT_FLOOR_SPRITE: SpriteData = Array.from(
   { length: TILE_SIZE },
-  () => Array(TILE_SIZE).fill(FALLBACK_FLOOR_COLOR) as string[],
+  () => Array(TILE_SIZE).fill(theme.fallbackFloorColor) as string[],
 )
 
 /** Module-level storage for floor tile sprites (set once on load) */
 let floorSprites: SpriteData[] = []
 
-/** Wall color constant */
-export const WALL_COLOR = '#3A3A5C'
+/** Wall color — now theme-aware */
+export function getWallColor(): string {
+  return theme.wallColor
+}
 
 /** Set floor tile sprites (called once when extension sends floorTilesLoaded) */
 export function setFloorSprites(sprites: SpriteData[]): void {

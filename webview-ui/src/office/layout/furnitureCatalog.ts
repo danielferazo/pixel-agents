@@ -10,7 +10,26 @@ import {
   PC_SPRITE,
   LAMP_SPRITE,
   ROUND_TABLE_SPRITE,
+  SOFA_SPRITE,
+  COFFEE_MACHINE_SPRITE,
+  TV_SPRITE,
+  ARCADE_SPRITE,
+  WINDOW_SPRITE,
+  FILE_CABINET_SPRITE,
+  PRINTER_SPRITE,
+  VENDING_MACHINE_SPRITE,
+  COFFEE_CUP_SPRITE,
+  OPEN_LAPTOP_SPRITE,
+  DESK_PAPERS_SPRITE,
 } from '../sprites/spriteData.js'
+import { DESK_CATALOG_ENTRIES } from './catalog-desks.js'
+import { SEATING_CATALOG_ENTRIES } from './catalog-seating.js'
+import { DECORATION_CATALOG_ENTRIES } from './catalog-decorations.js'
+import { ELECTRONICS_CATALOG_ENTRIES } from './catalog-electronics.js'
+import { KITCHEN_CATALOG_ENTRIES } from './catalog-kitchen.js'
+import { STORAGE_CATALOG_ENTRIES } from './catalog-storage.js'
+import { WINDOW_CATALOG_ENTRIES } from './catalog-windows.js'
+import { CAT_CATALOG_ENTRIES } from './catalog-cats.js'
 
 export interface LoadedAssetData {
   catalog: Array<{
@@ -50,7 +69,28 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
   { type: FurnitureType.LAMP,       label: 'Lamp',       footprintW: 1, footprintH: 1, sprite: LAMP_SPRITE,         isDesk: false, category: 'decor' },
   // Round table - seats 10 people in a circle
   { type: FurnitureType.ROUND_TABLE, label: 'Round Table', footprintW: 3, footprintH: 3, sprite: ROUND_TABLE_SPRITE, isDesk: true, category: 'desks' },
+  // Studio Noir furniture
+  { type: FurnitureType.SOFA, label: 'Sofa', footprintW: 2, footprintH: 1, sprite: SOFA_SPRITE, isDesk: false, category: 'chairs' },
+  { type: FurnitureType.COFFEE_MACHINE, label: 'Coffee Machine', footprintW: 1, footprintH: 1, sprite: COFFEE_MACHINE_SPRITE, isDesk: false, category: 'misc' },
+  { type: FurnitureType.TV, label: 'TV', footprintW: 2, footprintH: 1, sprite: TV_SPRITE, isDesk: false, category: 'electronics' },
+  { type: FurnitureType.ARCADE, label: 'Arcade', footprintW: 1, footprintH: 2, sprite: ARCADE_SPRITE, isDesk: false, category: 'misc' },
+  { type: FurnitureType.WINDOW,          label: 'Window',          footprintW: 4, footprintH: 1, sprite: WINDOW_SPRITE,          isDesk: false, category: 'decor'        },
+  { type: FurnitureType.FILE_CABINET,    label: 'File Cabinet',    footprintW: 1, footprintH: 2, sprite: FILE_CABINET_SPRITE,    isDesk: false, category: 'storage'      },
+  { type: FurnitureType.PRINTER,         label: 'Printer',         footprintW: 1, footprintH: 1, sprite: PRINTER_SPRITE,         isDesk: false, category: 'electronics'  },
+  { type: FurnitureType.VENDING_MACHINE, label: 'Vending Machine', footprintW: 1, footprintH: 2, sprite: VENDING_MACHINE_SPRITE, isDesk: false, category: 'misc'         },
+  { type: FurnitureType.COFFEE_CUP,      label: 'Coffee Cup',      footprintW: 1, footprintH: 1, sprite: COFFEE_CUP_SPRITE,      isDesk: false, category: 'decor',       canPlaceOnSurfaces: true },
+  { type: FurnitureType.OPEN_LAPTOP,     label: 'Laptop',          footprintW: 1, footprintH: 1, sprite: OPEN_LAPTOP_SPRITE,     isDesk: false, category: 'electronics', canPlaceOnSurfaces: true },
+  { type: FurnitureType.DESK_PAPERS,     label: 'Papers',          footprintW: 1, footprintH: 1, sprite: DESK_PAPERS_SPRITE,     isDesk: false, category: 'decor',       canPlaceOnSurfaces: true },
 
+  // ── Extended furniture pack ──────────────────────────
+  ...DESK_CATALOG_ENTRIES,
+  ...SEATING_CATALOG_ENTRIES,
+  ...DECORATION_CATALOG_ENTRIES,
+  ...ELECTRONICS_CATALOG_ENTRIES,
+  ...KITCHEN_CATALOG_ENTRIES,
+  ...STORAGE_CATALOG_ENTRIES,
+  ...WINDOW_CATALOG_ENTRIES,
+  ...CAT_CATALOG_ENTRIES,
 ]
 
 // ── Rotation groups ──────────────────────────────────────────────

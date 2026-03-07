@@ -1,0 +1,56 @@
+import type { CatalogEntryWithCategory } from './furnitureCatalog.js'
+import {
+  BOOKSHELF_A_SPRITE,
+  BOOKSHELF_B_SPRITE,
+  BOOKSHELF_C_SPRITE,
+  BOOKSHELF_D_SPRITE,
+  BOOKSHELF_E_SPRITE,
+  CARDBOARD_BOX_A_SPRITE,
+  CARDBOARD_BOX_B_SPRITE,
+  CARDBOARD_BOX_C_SPRITE,
+  CARDBOARD_BOX_D_SPRITE,
+  CARDBOARD_BOX_E_SPRITE,
+  CARDBOARD_BOX_F_SPRITE,
+  CARDBOARD_BOX_F_FLIP_SPRITE,
+  PAPER_V_SPRITE,
+  PAPER_H_A_SPRITE,
+  PAPER_H_B_SPRITE,
+  BOOK_RED_SPRITE,
+  BOOK_BLUE_SPRITE,
+  BOOK_GREEN_SPRITE,
+  BOOK_YELLOW_SPRITE,
+  BOOK_RED_FLIP_SPRITE,
+  BOOK_BLUE_FLIP_SPRITE,
+  BOOK_GREEN_FLIP_SPRITE,
+  BOOK_YELLOW_FLIP_SPRITE,
+} from '../sprites/spriteData-storage.js'
+
+export const STORAGE_CATALOG_ENTRIES: CatalogEntryWithCategory[] = [
+  // ── Bookshelves ───────────────────────────────────────────────────────────
+  { type: 'bookshelf_a', label: 'Bookshelf',         footprintW: 1, footprintH: 2, sprite: BOOKSHELF_A_SPRITE, isDesk: false, category: 'storage' },
+  { type: 'bookshelf_b', label: 'Bookshelf (sparse)', footprintW: 1, footprintH: 2, sprite: BOOKSHELF_B_SPRITE, isDesk: false, category: 'storage' },
+  { type: 'bookshelf_c', label: 'Bookshelf (decor)',  footprintW: 1, footprintH: 2, sprite: BOOKSHELF_C_SPRITE, isDesk: false, category: 'storage' },
+  { type: 'bookshelf_d', label: 'Bookshelf (empty)',  footprintW: 1, footprintH: 2, sprite: BOOKSHELF_D_SPRITE, isDesk: false, category: 'storage' },
+  { type: 'bookshelf_e', label: 'Bookshelf Double',   footprintW: 2, footprintH: 2, sprite: BOOKSHELF_E_SPRITE, isDesk: false, category: 'storage' },
+  // ── Cardboard boxes ───────────────────────────────────────────────────────
+  { type: 'box_a',      label: 'Box (closed)',   footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_A_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_b',      label: 'Box (open)',     footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_B_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_c',      label: 'Box (labeled)',  footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_C_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_d',      label: 'Stacked Boxes',  footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_D_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_e',      label: 'Flat Box',       footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_E_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_f',      label: 'Box (fragile)',  footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_F_SPRITE,      isDesk: false, category: 'storage' },
+  { type: 'box_f_flip', label: 'Box (flip)',     footprintW: 1, footprintH: 1, sprite: CARDBOARD_BOX_F_FLIP_SPRITE, isDesk: false, category: 'storage' },
+  // ── Paper ─────────────────────────────────────────────────────────────────
+  { type: 'paper_v',   label: 'Paper',          footprintW: 1, footprintH: 1, sprite: PAPER_V_SPRITE,   isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'paper_h_a', label: 'Paper (horiz)',  footprintW: 1, footprintH: 1, sprite: PAPER_H_A_SPRITE, isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'paper_h_b', label: 'Paper (flip)',   footprintW: 1, footprintH: 1, sprite: PAPER_H_B_SPRITE, isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  // ── Books (surface-placeable) ─────────────────────────────────────────────
+  { type: 'book_red',         label: 'Book (red)',    footprintW: 1, footprintH: 1, sprite: BOOK_RED_SPRITE,         isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_blue',        label: 'Book (blue)',   footprintW: 1, footprintH: 1, sprite: BOOK_BLUE_SPRITE,        isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_green',       label: 'Book (green)',  footprintW: 1, footprintH: 1, sprite: BOOK_GREEN_SPRITE,       isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_yellow',      label: 'Book (yellow)', footprintW: 1, footprintH: 1, sprite: BOOK_YELLOW_SPRITE,      isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_red_flip',    label: 'Book R (flip)', footprintW: 1, footprintH: 1, sprite: BOOK_RED_FLIP_SPRITE,    isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_blue_flip',   label: 'Book B (flip)', footprintW: 1, footprintH: 1, sprite: BOOK_BLUE_FLIP_SPRITE,   isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_green_flip',  label: 'Book G (flip)', footprintW: 1, footprintH: 1, sprite: BOOK_GREEN_FLIP_SPRITE,  isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'book_yellow_flip', label: 'Book Y (flip)', footprintW: 1, footprintH: 1, sprite: BOOK_YELLOW_FLIP_SPRITE, isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+]

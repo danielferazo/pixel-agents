@@ -1,0 +1,48 @@
+import type { CatalogEntryWithCategory } from './furnitureCatalog.js'
+import {
+  CLOCK_SPRITE,
+  PAINTING_LARGE_A_SPRITE,
+  PAINTING_LARGE_B_SPRITE,
+  PAINTING_SMALL_A_SPRITE,
+  PAINTING_SMALL_B_SPRITE,
+  PAINTING_SMALL_C_SPRITE,
+  PAINTING_SMALL_TEXT_SPRITE,
+  CHALKBOARD_SPRITE,
+  WHITEBOARD_B_SPRITE,
+  PLANT_A_SPRITE,
+  PLANT_B_SPRITE,
+  PLANT_A_FLIP_SPRITE,
+  PLANT_B_FLIP_SPRITE,
+  PLANT_SMALL_SPRITE,
+  DOORMAT_SPRITE,
+  DOORMAT_B_SPRITE,
+  DOORMAT_C_SPRITE,
+  DOORMAT_D_SPRITE,
+  DOORMAT_E_SPRITE,
+  DOORMAT_F_SPRITE,
+} from '../sprites/spriteData-decorations.js'
+
+export const DECORATION_CATALOG_ENTRIES: CatalogEntryWithCategory[] = [
+  // ── Wall-mounted items ────────────────────────────────────────
+  { type: 'clock',            label: 'Clock',            footprintW: 1, footprintH: 1, sprite: CLOCK_SPRITE,              isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_large_a', label: 'Large Painting',   footprintW: 2, footprintH: 2, sprite: PAINTING_LARGE_A_SPRITE,   isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_large_b', label: 'Large Painting B', footprintW: 2, footprintH: 2, sprite: PAINTING_LARGE_B_SPRITE,   isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_small_a', label: 'Small Painting',   footprintW: 1, footprintH: 1, sprite: PAINTING_SMALL_A_SPRITE,   isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_small_b', label: 'Small Painting B', footprintW: 1, footprintH: 1, sprite: PAINTING_SMALL_B_SPRITE,   isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_small_c', label: 'Small Painting C', footprintW: 1, footprintH: 1, sprite: PAINTING_SMALL_C_SPRITE,   isDesk: false, category: 'wall',  canPlaceOnWalls: true },
+  { type: 'painting_text',    label: 'Wall Sign',        footprintW: 1, footprintH: 1, sprite: PAINTING_SMALL_TEXT_SPRITE, isDesk: false, category: 'wall', canPlaceOnWalls: true },
+  // ── Floor / decor items ───────────────────────────────────────
+  { type: 'chalkboard',       label: 'Chalkboard',       footprintW: 2, footprintH: 2, sprite: CHALKBOARD_SPRITE,         isDesk: false, category: 'decor' },
+  { type: 'whiteboard_b',     label: 'Whiteboard Wide',  footprintW: 2, footprintH: 1, sprite: WHITEBOARD_B_SPRITE,       isDesk: false, category: 'decor' },
+  { type: 'plant_a',          label: 'Plant A',          footprintW: 1, footprintH: 2, sprite: PLANT_A_SPRITE,            isDesk: false, category: 'decor' },
+  { type: 'plant_b',          label: 'Plant B',          footprintW: 1, footprintH: 2, sprite: PLANT_B_SPRITE,            isDesk: false, category: 'decor' },
+  { type: 'plant_a_flip',     label: 'Plant A (flip)',   footprintW: 1, footprintH: 2, sprite: PLANT_A_FLIP_SPRITE,       isDesk: false, category: 'decor' },
+  { type: 'plant_b_flip',     label: 'Plant B (flip)',   footprintW: 1, footprintH: 2, sprite: PLANT_B_FLIP_SPRITE,       isDesk: false, category: 'decor' },
+  { type: 'plant_small',      label: 'Desk Plant',       footprintW: 1, footprintH: 1, sprite: PLANT_SMALL_SPRITE,        isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'doormat',          label: 'Door Mat',         footprintW: 2, footprintH: 1, sprite: DOORMAT_SPRITE,            isDesk: false, category: 'decor' },
+  { type: 'doormat_b',        label: 'Door Mat B',       footprintW: 2, footprintH: 1, sprite: DOORMAT_B_SPRITE,          isDesk: false, category: 'decor' },
+  { type: 'doormat_c',        label: 'Door Mat C',       footprintW: 2, footprintH: 1, sprite: DOORMAT_C_SPRITE,          isDesk: false, category: 'decor' },
+  { type: 'doormat_d',        label: 'Door Mat D',       footprintW: 2, footprintH: 1, sprite: DOORMAT_D_SPRITE,          isDesk: false, category: 'decor' },
+  { type: 'doormat_e',        label: 'Door Mat E',       footprintW: 2, footprintH: 1, sprite: DOORMAT_E_SPRITE,          isDesk: false, category: 'decor' },
+  { type: 'doormat_f',        label: 'Door Mat F',       footprintW: 2, footprintH: 1, sprite: DOORMAT_F_SPRITE,          isDesk: false, category: 'decor' },
+]

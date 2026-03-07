@@ -32,6 +32,10 @@ export const MATRIX_TRAIL_EMPTY_ALPHA = 0.5
 export const MATRIX_TRAIL_MID_THRESHOLD = 0.33
 export const MATRIX_TRAIL_DIM_THRESHOLD = 0.66
 
+// ── Background ───────────────────────────────────────────────
+/** Dark void background — office floats on this color */
+export const CANVAS_BACKGROUND_COLOR = '#0B0B16'
+
 // ── Rendering ────────────────────────────────────────────────
 export const CHARACTER_SITTING_OFFSET_PX = 6
 export const CHARACTER_Z_SORT_OFFSET = 0.5

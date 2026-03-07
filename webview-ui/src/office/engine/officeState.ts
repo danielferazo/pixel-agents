@@ -54,6 +54,8 @@ export class OfficeState {
     this.blockedTiles = getBlockedTiles(this.layout.furniture)
     this.furniture = layoutToFurnitureInstances(this.layout.furniture)
     this.walkableTiles = getWalkableTiles(this.tileMap, this.blockedTiles)
+    // Spawn office cats after layout is ready
+    this.spawnCats(3)
   }
 
   /** Rebuild all derived state from a new layout. Reassigns existing characters.
@@ -127,6 +129,9 @@ export class OfficeState {
         this.relocateCharacterToWalkable(ch)
       }
     }
+
+    // Respawn cats after layout rebuild (walkable tiles may have changed)
+    this.spawnCats(3)
   }
 
   /** Move a character to a random walkable tile */
@@ -139,6 +144,64 @@ export class OfficeState {
     ch.y = spawn.row * TILE_SIZE + TILE_SIZE / 2
     ch.path = []
     ch.moveProgress = 0
+  }
+
+  /** Spawn wandering office cats. Called once after layout loads and after rebuilds. */
+  spawnCats(count = 3): void {
+    const skins: Array<'orange' | 'black' | 'tabby' | 'white'> = ['orange', 'black', 'tabby', 'white']
+    const walkable = this.walkableTiles
+    if (walkable.length === 0) return
+
+    // Remove any existing cats first
+    const catIds: number[] = []
+    for (const [id, ch] of this.characters) {
+      if (ch.isCat) catIds.push(id)
+    }
+    for (const id of catIds) {
+      this.characters.delete(id)
+    }
+
+    // Cat IDs start at -9001 (separate from subagents which use -1 to -1000)
+    let catId = -9001
+
+    for (let i = 0; i < count; i++) {
+      const skin = skins[i % skins.length]
+      const tile = walkable[Math.floor(Math.random() * walkable.length)]
+      const center = { x: tile.col * TILE_SIZE + TILE_SIZE / 2, y: tile.row * TILE_SIZE + TILE_SIZE / 2 }
+
+      const cat: Character = {
+        id: catId--,
+        state: CharacterState.IDLE,
+        dir: Direction.DOWN,
+        x: center.x,
+        y: center.y,
+        tileCol: tile.col,
+        tileRow: tile.row,
+        path: [],
+        moveProgress: 0,
+        currentTool: null,
+        palette: 0,
+        hueShift: 0,
+        frame: 0,
+        frameTimer: 0,
+        wanderTimer: Math.random() * 2,  // stagger initial wander so cats don't all move at once
+        wanderCount: 0,
+        wanderLimit: 999,  // cats never rest at a seat — they roam forever
+        isActive: false,
+        seatId: null,
+        bubbleType: null,
+        bubbleTimer: 0,
+        seatTimer: 0,
+        isSubagent: false,
+        parentAgentId: null,
+        matrixEffect: null,
+        matrixEffectTimer: 0,
+        matrixEffectSeeds: [],
+        isCat: true,
+        catSkin: skin,
+      }
+      this.characters.set(cat.id, cat)
+    }
   }
 
   getLayout(): OfficeLayout {

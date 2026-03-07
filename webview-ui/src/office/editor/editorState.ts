@@ -1,6 +1,7 @@
 import { EditTool, TileType } from '../types.js'
 import type { TileType as TileTypeVal, OfficeLayout, FloorColor } from '../types.js'
-import { UNDO_STACK_MAX_SIZE, DEFAULT_FLOOR_COLOR, DEFAULT_WALL_COLOR } from '../../constants.js'
+import { UNDO_STACK_MAX_SIZE } from '../../constants.js'
+import { theme } from '../theme.js'
 
 export class EditorState {
   isEditMode = false
@@ -8,11 +9,11 @@ export class EditorState {
   selectedTileType: TileTypeVal = TileType.FLOOR_1
   selectedFurnitureType: string = 'desk' // FurnitureType.DESK or asset ID
 
-  // Floor color settings (applied to new tiles when painting)
-  floorColor: FloorColor = { ...DEFAULT_FLOOR_COLOR }
+  // Floor color settings (applied to new tiles when painting) — theme-aware
+  floorColor: FloorColor = { ...theme.defaultFloorColor }
 
-  // Wall color settings (applied to new wall tiles when painting)
-  wallColor: FloorColor = { ...DEFAULT_WALL_COLOR }
+  // Wall color settings (applied to new wall tiles when painting) — theme-aware
+  wallColor: FloorColor = { ...theme.defaultWallColor }
 
   // Tracks toggle direction during wall drag (true=adding walls, false=removing, null=undecided)
   wallDragAdding: boolean | null = null

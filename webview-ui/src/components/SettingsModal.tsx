@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { vscode } from '../vscodeApi.js'
 import { isSoundEnabled, setSoundEnabled } from '../notificationSound.js'
+import { THEME_LIST, getCurrentThemeId, setTheme } from '../office/theme.js'
+import { WeatherType, getWeather, setWeather } from '../office/weather.js'
 
 interface SettingsModalProps {
   isOpen: boolean
@@ -27,6 +29,17 @@ const menuItemBase: React.CSSProperties = {
 export function SettingsModal({ isOpen, onClose, isDebugMode, onToggleDebugMode }: SettingsModalProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [soundLocal, setSoundLocal] = useState(isSoundEnabled)
+  const [currentTheme, setCurrentTheme] = useState(getCurrentThemeId())
+  const [showThemeDropdown, setShowThemeDropdown] = useState(false)
+  const [currentWeather, setCurrentWeather] = useState(getWeather())
+  const [showWeatherDropdown, setShowWeatherDropdown] = useState(false)
+
+  const weatherOptions = [
+    { type: WeatherType.CLEAR, name: 'Clear', icon: '' },
+    { type: WeatherType.RAIN, name: 'Rain', icon: '' },
+    { type: WeatherType.SNOW, name: 'Snow', icon: '' },
+    { type: WeatherType.STORM, name: 'Storm', icon: '' },
+  ]
 
   if (!isOpen) return null
 
@@ -168,6 +181,107 @@ export function SettingsModal({ isOpen, onClose, isDebugMode, onToggleDebugMode 
             {soundLocal ? 'X' : ''}
           </span>
         </button>
+        {/* Theme selector */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowThemeDropdown(!showThemeDropdown)}
+            onMouseEnter={() => setHovered('theme')}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              ...menuItemBase,
+              background: hovered === 'theme' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+            }}
+          >
+            <span>Theme</span>
+            <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '16px' }}>
+              {THEME_LIST.find(t => t.id === currentTheme)?.name || 'Studio Noir'}
+            </span>
+          </button>
+          {showThemeDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '100%',
+                top: 0,
+                background: 'var(--pixel-bg)',
+                border: '2px solid var(--pixel-border)',
+                minWidth: 180,
+                zIndex: 51,
+              }}
+            >
+              {THEME_LIST.map(theme => (
+                <button
+                  key={theme.id}
+                  onClick={() => {
+                    setTheme(theme.id)
+                    setCurrentTheme(theme.id)
+                    setShowThemeDropdown(false)
+                    vscode.postMessage({ type: 'setTheme', themeId: theme.id })
+                    // Force re-render by reloading the page (simplest approach for now)
+                    window.location.reload()
+                  }}
+                  style={{
+                    ...menuItemBase,
+                    padding: '8px 12px',
+                    fontSize: '18px',
+                    background: currentTheme === theme.id ? 'rgba(90, 140, 255, 0.2)' : 'transparent',
+                  }}
+                >
+                  <span>{theme.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Weather selector */}
+        <div style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowWeatherDropdown(!showWeatherDropdown)}
+            onMouseEnter={() => setHovered('weather')}
+            onMouseLeave={() => setHovered(null)}
+            style={{
+              ...menuItemBase,
+              background: hovered === 'weather' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+            }}
+          >
+            <span>Weather</span>
+            <span style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '16px' }}>
+              {weatherOptions.find(w => w.type === currentWeather)?.name || 'Clear'}
+            </span>
+          </button>
+          {showWeatherDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                left: '100%',
+                top: 0,
+                background: 'var(--pixel-bg)',
+                border: '2px solid var(--pixel-border)',
+                minWidth: 140,
+                zIndex: 51,
+              }}
+            >
+              {weatherOptions.map(weather => (
+                <button
+                  key={weather.type}
+                  onClick={() => {
+                    setWeather(weather.type)
+                    setCurrentWeather(weather.type)
+                    setShowWeatherDropdown(false)
+                  }}
+                  style={{
+                    ...menuItemBase,
+                    padding: '8px 12px',
+                    fontSize: '18px',
+                    background: currentWeather === weather.type ? 'rgba(90, 140, 255, 0.2)' : 'transparent',
+                  }}
+                >
+                  <span>{weather.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         <button
           onClick={onToggleDebugMode}
           onMouseEnter={() => setHovered('debug')}

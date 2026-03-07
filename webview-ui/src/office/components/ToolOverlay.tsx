@@ -21,28 +21,48 @@ function formatName(text: string): string {
   return text.replace(/-/g, ' ')
 }
 
-/** Derive a short human-readable activity string from tools/status */
-function getActivityText(
+/** Get a more descriptive status for the agent */
+function getAgentStatus(
   agentId: number,
   agentTools: Record<number, ToolActivity[]>,
   isActive: boolean,
-): string {
+): { status: string; detail: string; icon: string } {
   const tools = agentTools[agentId]
   if (tools && tools.length > 0) {
     // Find the latest non-done tool
     const activeTool = [...tools].reverse().find((t) => !t.done)
     if (activeTool) {
-      if (activeTool.permissionWait) return 'Needs approval'
-      return activeTool.status
+      if (activeTool.permissionWait) return { status: 'Waiting', detail: 'Needs your approval', icon: '⚠️' }
+      // Map tool IDs to more readable descriptions
+      const toolId = activeTool.toolId.toLowerCase()
+      let action = activeTool.status
+      if (toolId.includes('read') || toolId.includes('grep')) action = 'Reading files'
+      else if (toolId.includes('write') || toolId.includes('edit')) action = 'Writing code'
+      else if (toolId.includes('bash') || toolId.includes('run')) action = 'Running commands'
+      else if (toolId.includes('task')) action = 'Delegating work'
+      else if (toolId.includes('webfetch') || toolId.includes('websearch')) action = 'Researching'
+      else if (toolId.includes('memory')) action = 'Using memory'
+      return { status: 'Working', detail: action, icon: '⚡' }
     }
-    // All tools done but agent still active (mid-turn) — keep showing last tool status
+    // All tools done but agent still active (mid-turn)
     if (isActive) {
       const lastTool = tools[tools.length - 1]
-      if (lastTool) return lastTool.status
+      if (lastTool) return { status: 'Thinking', detail: lastTool.status, icon: '💭' }
     }
   }
 
-  return 'Idle'
+  return { status: 'Idle', detail: 'Waiting for input', icon: '💤' }
+}
+
+/** Get role badge if we can infer from context */
+function getRoleBadge(folderName: string | undefined): string | null {
+  if (!folderName) return null
+  const name = folderName.toLowerCase()
+  if (name.includes('design') || name.includes('ui') || name.includes('ux')) return '🎨 Designer'
+  if (name.includes('research') || name.includes('data')) return '🔬 Researcher'
+  if (name.includes('pm') || name.includes('product')) return '📋 PM'
+  if (name.includes('test') || name.includes('qa')) return '🧪 QA'
+  return null
 }
 
 export function ToolOverlay({
@@ -104,17 +124,24 @@ export function ToolOverlay({
 
         // Get activity text
         const subHasPermission = isSub && ch.bubbleType === 'permission'
+        let statusInfo: { status: string; detail: string; icon: string }
         let activityText: string
+
         if (isSub) {
           if (subHasPermission) {
-            activityText = 'Needs approval'
+            statusInfo = { status: 'Waiting', detail: 'Needs approval', icon: '⚠️' }
           } else {
             const sub = subagentCharacters.find((s) => s.id === id)
-            activityText = formatName(sub ? sub.label : 'Subtask')
+            statusInfo = { status: 'Subtask', detail: formatName(sub?.label || 'Working'), icon: '🔧' }
           }
+          activityText = statusInfo.detail
         } else {
-          activityText = formatName(getActivityText(id, agentTools, ch.isActive))
+          statusInfo = getAgentStatus(id, agentTools, ch.isActive)
+          activityText = `${statusInfo.icon} ${statusInfo.detail}`
         }
+
+        // Get role badge
+        const roleBadge = !isSub ? getRoleBadge(ch.folderName) : null
 
         // Determine dot color
         const tools = agentTools[id]
@@ -149,10 +176,10 @@ export function ToolOverlay({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 5,
-                background: 'var(--pixel-bg)',
+                background: 'rgba(10, 10, 20, 0.95)',
                 border: isSelected
                   ? '2px solid var(--pixel-border-light)'
-                  : '2px solid var(--pixel-border)',
+                  : '1px solid rgba(255,255,255,0.15)',
                 borderRadius: 0,
                 padding: isSelected ? '3px 6px 3px 8px' : '3px 8px',
                 boxShadow: 'var(--pixel-shadow)',
@@ -173,29 +200,39 @@ export function ToolOverlay({
                 />
               )}
               <div style={{ overflow: 'hidden' }}>
-                <span
-                  style={{
-                    fontSize: isSub ? '20px' : '22px',
-                    fontStyle: isSub ? 'italic' : undefined,
-                    color: 'var(--vscode-foreground)',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: 'block',
-                  }}
-                >
+                {/* Agent identity - show status icon and role badge */}
+                <span style={{
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  color: isSub ? 'var(--pixel-text-dim)' : statusInfo.icon === '⚡' ? '#4CAF50' : statusInfo.icon === '💭' ? '#2196F3' : statusInfo.icon === '⚠️' ? '#FF5722' : 'var(--pixel-accent)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  letterSpacing: '0.5px',
+                }}>
+                  <span>{statusInfo.icon}</span>
+                  <span>{isSub ? 'Subtask' : statusInfo.status}</span>
+                  {roleBadge && <span style={{ fontSize: '12px', opacity: 0.8, marginLeft: 4 }}>{roleBadge}</span>}
+                </span>
+                {/* Activity detail */}
+                <span style={{
+                  fontSize: '18px',
+                  color: 'var(--vscode-foreground)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: 'block',
+                }}>
                   {activityText}
                 </span>
+                {/* Project folder */}
                 {ch.folderName && (
-                  <span
-                    style={{
-                      fontSize: '16px',
-                      color: 'var(--pixel-text-dim)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: 'block',
-                    }}
-                  >
-                    {formatName(ch.folderName)}
+                  <span style={{
+                    fontSize: '13px',
+                    color: 'var(--pixel-text-dim)',
+                    display: 'block',
+                    marginTop: 2,
+                  }}>
+                    📁 {formatName(ch.folderName)}
                   </span>
                 )}
               </div>

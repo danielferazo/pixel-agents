@@ -1,11 +1,15 @@
-import { TileType, TILE_SIZE, CharacterState } from '../types.js'
-import type { TileType as TileTypeVal, FurnitureInstance, Character, SpriteData, Seat, FloorColor } from '../types.js'
+import { TileType, TILE_SIZE, CharacterState, Direction } from '../types.js'
+import type { TileType as TileTypeVal, FurnitureInstance, Character, SpriteData, Seat, FloorColor, ZoneLabel } from '../types.js'
 import { getCachedSprite, getOutlineSprite } from '../sprites/spriteCache.js'
 import { getCharacterSprites, BUBBLE_PERMISSION_SPRITE, BUBBLE_WAITING_SPRITE, BUBBLE_THINKING_SPRITE, BUBBLE_SUCCESS_SPRITE, BUBBLE_ERROR_SPRITE, BUBBLE_WAITING_HUMAN_SPRITE, CROWN_BADGE_SPRITE } from '../sprites/spriteData.js'
+import { getCatSprite } from '../sprites/spriteData-cats.js'
 import { getCharacterSprite } from './characters.js'
 import { renderMatrixEffect } from './matrixEffect.js'
-import { getColorizedFloorSprite, hasFloorSprites, WALL_COLOR } from '../floorTiles.js'
+import { renderParticles } from './particles.js'
+import { getColorizedFloorSprite, hasFloorSprites, getWallColor } from '../floorTiles.js'
 import { hasWallSprites, getWallInstances, wallColorToHex } from '../wallTiles.js'
+import { theme } from '../theme.js'
+import { getTimeModifier, getWeatherConfig, createWeatherParticles, updateWeatherParticles, type WeatherParticle } from '../weather.js'
 import {
   CHARACTER_SITTING_OFFSET_PX,
   CHARACTER_Z_SORT_OFFSET,
@@ -23,22 +27,49 @@ import {
   BUBBLE_FADE_DURATION_SEC,
   BUBBLE_SITTING_OFFSET_PX,
   BUBBLE_VERTICAL_OFFSET_PX,
-  FALLBACK_FLOOR_COLOR,
-  SEAT_OWN_COLOR,
-  SEAT_AVAILABLE_COLOR,
-  SEAT_BUSY_COLOR,
-  GRID_LINE_COLOR,
-  VOID_TILE_OUTLINE_COLOR,
-  VOID_TILE_DASH_PATTERN,
-  GHOST_BORDER_HOVER_FILL,
-  GHOST_BORDER_HOVER_STROKE,
-  GHOST_BORDER_STROKE,
   GHOST_VALID_TINT,
   GHOST_INVALID_TINT,
-  SELECTION_HIGHLIGHT_COLOR,
-  DELETE_BUTTON_BG,
-  ROTATE_BUTTON_BG,
+  VOID_TILE_DASH_PATTERN,
 } from '../../constants.js'
+
+// Weather particle state (module-level for persistence across frames)
+let weatherParticles: WeatherParticle[] = []
+let lastWeatherParticleUpdate = 0
+
+// Initialize weather particles if needed
+function ensureWeatherParticles(canvasWidth: number): void {
+  const weatherConfig = getWeatherConfig()
+  if (weatherConfig.intensity === 0) {
+    weatherParticles = []
+    return
+  }
+  if (weatherParticles.length === 0) {
+    weatherParticles = createWeatherParticles(200, canvasWidth)
+  }
+}
+
+// Update weather particles (call each frame)
+function updateWeather(deltaTime: number, canvasWidth: number, canvasHeight: number): void {
+  const weatherConfig = getWeatherConfig()
+  if (weatherConfig.intensity === 0) return
+  if (weatherParticles.length === 0) {
+    weatherParticles = createWeatherParticles(200, canvasWidth)
+  }
+  updateWeatherParticles(weatherParticles, canvasWidth, canvasHeight, deltaTime)
+}
+
+// Render weather particles (rain/snow)
+function renderWeatherParticles(ctx: CanvasRenderingContext2D, _canvasWidth: number, _canvasHeight: number): void {
+  const weatherConfig = getWeatherConfig()
+  if (weatherConfig.intensity === 0 || weatherParticles.length === 0) return
+
+  for (const p of weatherParticles) {
+    ctx.fillStyle = weatherConfig.particleColor
+    ctx.globalAlpha = p.alpha
+    ctx.fillRect(p.x, p.y, p.size, p.size * 3) // Elongated for rain effect
+  }
+  ctx.globalAlpha = 1
+}
 
 // ── Render functions ────────────────────────────────────────────
 
@@ -50,6 +81,7 @@ export function renderTileGrid(
   zoom: number,
   tileColors?: Array<FloorColor | null>,
   cols?: number,
+  floorBrightness?: number,
 ): void {
   const s = TILE_SIZE * zoom
   const useSpriteFloors = hasFloorSprites()
@@ -70,9 +102,9 @@ export function renderTileGrid(
         if (tile === TileType.WALL) {
           const colorIdx = r * layoutCols + c
           const wallColor = tileColors?.[colorIdx]
-          ctx.fillStyle = wallColor ? wallColorToHex(wallColor) : WALL_COLOR
+          ctx.fillStyle = wallColor ? wallColorToHex(wallColor) : getWallColor()
         } else {
-          ctx.fillStyle = FALLBACK_FLOOR_COLOR
+          ctx.fillStyle = theme.fallbackFloorColor
         }
         ctx.fillRect(offsetX + c * s, offsetY + r * s, s, s)
         continue
@@ -87,6 +119,13 @@ export function renderTileGrid(
     }
   }
 
+  // Apply floor brightness overlay (time-of-day dimming)
+  if (floorBrightness !== undefined && floorBrightness < 1) {
+    const brightnessOverlay = 1 - floorBrightness
+    const tileRows = tmRows
+    ctx.fillStyle = `rgba(0, 0, 0, ${brightnessOverlay})`
+    ctx.fillRect(offsetX, offsetY, tmCols * s, tileRows * s)
+  }
 }
 
 interface ZDrawable {
@@ -121,8 +160,19 @@ export function renderScene(
 
   // Characters
   for (const ch of characters) {
-    const sprites = getCharacterSprites(ch.palette, ch.hueShift)
-    const spriteData = getCharacterSprite(ch, sprites)
+    let spriteData: SpriteData
+    if (ch.isCat) {
+      // Cats use their own directional sprites
+      let catSprite = getCatSprite(ch)
+      // Flip RIGHT sprite horizontally for LEFT direction
+      if (ch.dir === Direction.LEFT) {
+        catSprite = catSprite.map(row => [...row].reverse())
+      }
+      spriteData = catSprite
+    } else {
+      const sprites = getCharacterSprites(ch.palette, ch.hueShift)
+      spriteData = getCharacterSprite(ch, sprites)
+    }
     const cached = getCachedSprite(spriteData, zoom)
     // Sitting offset: shift character down when seated so they visually sit in the chair
     const sittingOffset = ch.state === CharacterState.TYPE ? CHARACTER_SITTING_OFFSET_PX : 0
@@ -150,9 +200,9 @@ export function renderScene(
       continue
     }
 
-    // White outline: full opacity for selected, 50% for hover
-    const isSelected = selectedAgentId !== null && ch.id === selectedAgentId
-    const isHovered = hoveredAgentId !== null && ch.id === hoveredAgentId
+    // White outline: full opacity for selected, 50% for hover (cats are not selectable)
+    const isSelected = selectedAgentId !== null && ch.id === selectedAgentId && !ch.isCat
+    const isHovered = hoveredAgentId !== null && ch.id === hoveredAgentId && !ch.isCat
     if (isSelected || isHovered) {
       const outlineAlpha = isSelected ? SELECTED_OUTLINE_ALPHA : HOVERED_OUTLINE_ALPHA
       const outlineData = getOutlineSprite(spriteData)
@@ -170,10 +220,62 @@ export function renderScene(
       })
     }
 
+    // Expanding pulse ring for TYPE-state characters — shows they're actively working
+    if (ch.state === CharacterState.TYPE) {
+      const ringCx = drawX + cached.width / 2
+      const ringCy = drawY + cached.height - 3 * zoom  // near feet
+      const ringChId = ch.id
+      drawables.push({
+        zY: charZY - 0.01,  // just behind character
+        draw: (c) => {
+          const ringPeriodMs = 2200
+          const t = ((Date.now() + Math.abs(ringChId) * 373) % ringPeriodMs) / ringPeriodMs
+          const ringRadius = t * 14 * zoom
+          const ringAlpha = (1 - t) * 0.38
+          c.save()
+          c.globalAlpha = ringAlpha
+          c.strokeStyle = theme.statusActive
+          c.lineWidth = Math.max(1, zoom * 0.5)
+          c.beginPath()
+          c.arc(ringCx, ringCy, ringRadius, 0, Math.PI * 2)
+          c.stroke()
+          c.restore()
+        },
+      })
+    }
+
+    // Status glow: active agents pulse green, permission agents glow red, waiting glows amber
+    // Mood adds additional tint on top of status
+    const moodTint = ch.mood === 'happy' ? '#4CAF50' :
+      ch.mood === 'stressed' ? '#FF5722' :
+      ch.mood === 'celebrating' ? '#FFEB3B' :
+      ch.mood === 'thinking' ? '#2196F3' :
+      ch.mood === 'confused' ? '#9C27B0' : null
+
+    let glowColor =
+      ch.bubbleType === 'permission' ? theme.statusPermission :
+      ch.bubbleType === 'waiting' || ch.bubbleType === 'waiting_on_human' ? theme.statusWaiting :
+      ch.state === CharacterState.TYPE ? theme.statusActive :
+      null
+
+    // Apply mood tint if no status glow, or blend mood on top
+    if (!glowColor && moodTint) {
+      glowColor = moodTint
+    }
+
+    const glowBlur = 5 * zoom
     drawables.push({
       zY: charZY,
       draw: (c) => {
-        c.drawImage(cached, drawX, drawY)
+        if (glowColor) {
+          c.save()
+          c.shadowColor = glowColor
+          c.shadowBlur = glowBlur
+          c.drawImage(cached, drawX, drawY)
+          c.restore()
+        } else {
+          c.drawImage(cached, drawX, drawY)
+        }
       },
     })
   }
@@ -274,13 +376,13 @@ export function renderSeatIndicators(
 
     if (selectedChar.seatId === uid) {
       // Selected agent's own seat — blue
-      ctx.fillStyle = SEAT_OWN_COLOR
+      ctx.fillStyle = theme.seatOwn
     } else if (!seat.assigned) {
       // Available seat — green
-      ctx.fillStyle = SEAT_AVAILABLE_COLOR
+      ctx.fillStyle = theme.seatAvailable
     } else {
       // Busy (assigned to another agent) — red
-      ctx.fillStyle = SEAT_BUSY_COLOR
+      ctx.fillStyle = theme.seatBusy
     }
     ctx.fillRect(x, y, s, s)
     break
@@ -299,7 +401,7 @@ export function renderGridOverlay(
   tileMap?: TileTypeVal[][],
 ): void {
   const s = TILE_SIZE * zoom
-  ctx.strokeStyle = GRID_LINE_COLOR
+  ctx.strokeStyle = theme.gridLine
   ctx.lineWidth = 1
   ctx.beginPath()
   // Vertical lines — offset by 0.5 for crisp 1px lines
@@ -319,7 +421,7 @@ export function renderGridOverlay(
   // Draw faint dashed outlines on VOID tiles
   if (tileMap) {
     ctx.save()
-    ctx.strokeStyle = VOID_TILE_OUTLINE_COLOR
+    ctx.strokeStyle = theme.voidTileOutline
     ctx.lineWidth = 1
     ctx.setLineDash(VOID_TILE_DASH_PATTERN)
     for (let r = 0; r < rows; r++) {
@@ -365,10 +467,10 @@ export function renderGhostBorder(
     const y = offsetY + r * s
     const isHovered = c === ghostHoverCol && r === ghostHoverRow
     if (isHovered) {
-      ctx.fillStyle = GHOST_BORDER_HOVER_FILL
+      ctx.fillStyle = theme.ghostBorderHoverFill
       ctx.fillRect(x, y, s, s)
     }
-    ctx.strokeStyle = isHovered ? GHOST_BORDER_HOVER_STROKE : GHOST_BORDER_STROKE
+    ctx.strokeStyle = isHovered ? theme.ghostBorderHoverStroke : theme.ghostBorderStroke
     ctx.lineWidth = 1
     ctx.setLineDash(VOID_TILE_DASH_PATTERN)
     ctx.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1)
@@ -414,7 +516,7 @@ export function renderSelectionHighlight(
   const x = offsetX + col * s
   const y = offsetY + row * s
   ctx.save()
-  ctx.strokeStyle = SELECTION_HIGHLIGHT_COLOR
+  ctx.strokeStyle = theme.selectionHighlight
   ctx.lineWidth = 2
   ctx.setLineDash(SELECTION_DASH_PATTERN)
   ctx.strokeRect(x + 1, y + 1, w * s - 2, h * s - 2)
@@ -441,7 +543,7 @@ export function renderDeleteButton(
   ctx.save()
   ctx.beginPath()
   ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-  ctx.fillStyle = DELETE_BUTTON_BG
+  ctx.fillStyle = theme.deleteButton
   ctx.fill()
 
   // X mark
@@ -480,7 +582,7 @@ export function renderRotateButton(
   ctx.save()
   ctx.beginPath()
   ctx.arc(cx, cy, radius, 0, Math.PI * 2)
-  ctx.fillStyle = ROTATE_BUTTON_BG
+  ctx.fillStyle = theme.rotateButton
   ctx.fill()
 
   // Circular arrow icon
@@ -606,6 +708,30 @@ export interface SelectionRenderState {
   characters: Map<number, Character>
 }
 
+/** Render faint zone name labels on the floor — orientation markers for the office. */
+function renderZoneLabels(
+  ctx: CanvasRenderingContext2D,
+  zones: ZoneLabel[],
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  if (zones.length === 0) return
+  ctx.save()
+  // Pixel art aesthetic: small monospace caps, very faint
+  const fontSize = Math.max(6, Math.round(zoom * 5))
+  ctx.font = `bold ${fontSize}px monospace`
+  ctx.textBaseline = 'top'
+  ctx.letterSpacing = `${Math.max(1, zoom)}px`
+  for (const zone of zones) {
+    const x = offsetX + zone.col * TILE_SIZE * zoom + 3
+    const y = offsetY + zone.row * TILE_SIZE * zoom + 3
+    ctx.fillStyle = zone.color ?? 'rgba(255,255,255,0.12)'
+    ctx.fillText(zone.label, x, y)
+  }
+  ctx.restore()
+}
+
 export function renderFrame(
   ctx: CanvasRenderingContext2D,
   canvasWidth: number,
@@ -621,9 +747,21 @@ export function renderFrame(
   tileColors?: Array<FloorColor | null>,
   layoutCols?: number,
   layoutRows?: number,
+  zones?: ZoneLabel[],
 ): { offsetX: number; offsetY: number } {
-  // Clear
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+  // Dark void background — office floats in space
+  ctx.fillStyle = theme.backgroundColor
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+
+  // Time-of-day ambient tint (dawn/dusk/night color overlay)
+  const timeModifier = getTimeModifier()
+  if (timeModifier.backgroundTint !== 'rgba(255, 255, 255, 0.05)') {
+    ctx.fillStyle = timeModifier.backgroundTint
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+  }
+
+  // Initialize weather particles if needed
+  ensureWeatherParticles(canvasWidth)
 
   // Use layout dimensions (fallback to tileMap size)
   const cols = layoutCols ?? (tileMap.length > 0 ? tileMap[0].length : 0)
@@ -635,8 +773,17 @@ export function renderFrame(
   const offsetX = Math.floor((canvasWidth - mapW) / 2) + Math.round(panX)
   const offsetY = Math.floor((canvasHeight - mapH) / 2) + Math.round(panY)
 
+  // Ambient particles floating in the void around the office
+  renderParticles(ctx, canvasWidth, canvasHeight, offsetX, offsetY, mapW, mapH)
+
   // Draw tiles (floor + wall base color)
-  renderTileGrid(ctx, tileMap, offsetX, offsetY, zoom, tileColors, layoutCols)
+  // Draw tiles (floor + wall base color) with time-of-day brightness
+  renderTileGrid(ctx, tileMap, offsetX, offsetY, zoom, tileColors, layoutCols, timeModifier.floorBrightness)
+
+  // Zone labels — faint orientation markers on the floor
+  if (zones && zones.length > 0) {
+    renderZoneLabels(ctx, zones, offsetX, offsetY, zoom)
+  }
 
   // Seat indicators (below furniture/characters, on top of floor)
   if (selection) {
@@ -686,6 +833,28 @@ export function renderFrame(
       editor.rotateButtonBounds = null
     }
   }
+
+  // Ambient vignette — subtly darkens corners, pulses gently to feel alive
+  const vignetteInner = Math.min(canvasWidth, canvasHeight) * 0.28
+  const vignetteOuter = Math.max(canvasWidth, canvasHeight) * 0.88
+  const vignette = ctx.createRadialGradient(
+    canvasWidth / 2, canvasHeight / 2, vignetteInner,
+    canvasWidth / 2, canvasHeight / 2, vignetteOuter,
+  )
+  const pulse = theme.vignetteBase + theme.vignettePulse * Math.sin(Date.now() / 1800)
+  vignette.addColorStop(0, 'rgba(0,0,0,0)')
+  vignette.addColorStop(1, `rgba(0,0,0,${pulse.toFixed(3)})`)
+  ctx.fillStyle = vignette
+  ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+
+  // Update and render weather particles (rain/snow/storm)
+  const now = Date.now()
+  if (now - lastWeatherParticleUpdate > 16) { // ~60fps cap
+    const dt = Math.min((now - lastWeatherParticleUpdate) / 1000, 0.1)
+    updateWeather(dt, canvasWidth, canvasHeight)
+    lastWeatherParticleUpdate = now
+  }
+  renderWeatherParticles(ctx, canvasWidth, canvasHeight)
 
   return { offsetX, offsetY }
 }

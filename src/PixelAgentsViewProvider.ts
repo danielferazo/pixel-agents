@@ -15,7 +15,7 @@ import {
 } from './agentManager.js';
 import { ensureProjectScan, readNewLines } from './fileWatcher.js';
 import { loadFurnitureAssets, sendAssetsToWebview, loadFloorTiles, sendFloorTilesToWebview, loadWallTiles, sendWallTilesToWebview, loadCharacterSprites, sendCharacterSpritesToWebview, loadDefaultLayout } from './assetLoader.js';
-import { WORKSPACE_KEY_AGENT_SEATS, GLOBAL_KEY_SOUND_ENABLED } from './constants.js';
+import { WORKSPACE_KEY_AGENT_SEATS, GLOBAL_KEY_SOUND_ENABLED, GLOBAL_KEY_THEME } from './constants.js';
 import { writeLayoutToFile, readLayoutFromFile, watchLayoutFile } from './layoutPersistence.js';
 import type { LayoutWatcher } from './layoutPersistence.js';
 
@@ -91,6 +91,8 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				writeLayoutToFile(message.layout as Record<string, unknown>);
 			} else if (message.type === 'setSoundEnabled') {
 				this.context.globalState.update(GLOBAL_KEY_SOUND_ENABLED, message.enabled);
+			} else if (message.type === 'setTheme') {
+				this.context.globalState.update(GLOBAL_KEY_THEME, message.themeId);
 			} else if (message.type === 'webviewReady') {
 				restoreAgents(
 					this.context,
@@ -102,7 +104,8 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				);
 				// Send persisted settings to webview
 				const soundEnabled = this.context.globalState.get<boolean>(GLOBAL_KEY_SOUND_ENABLED, true);
-				this.webview?.postMessage({ type: 'settingsLoaded', soundEnabled });
+				const theme = this.context.globalState.get<string>(GLOBAL_KEY_THEME, 'studio_noir');
+				this.webview?.postMessage({ type: 'settingsLoaded', soundEnabled, theme });
 
 				// Send workspace folders to webview (only when multi-root)
 				const wsFolders = vscode.workspace.workspaceFolders;

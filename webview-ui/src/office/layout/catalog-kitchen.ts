@@ -1,0 +1,38 @@
+import type { CatalogEntryWithCategory } from './furnitureCatalog.js'
+import {
+  COFFEE_MACHINE_B_SPRITE,
+  MICROWAVE_A_SPRITE,
+  MICROWAVE_B_SPRITE,
+  FRIDGE_A_SPRITE,
+  FRIDGE_B_SPRITE,
+  WATER_DISPENSER_L_SPRITE,
+  WATER_DISPENSER_R_SPRITE,
+  MUG_FRONT_SPRITE,
+  MUG_RIGHT_SPRITE,
+  MUG_LEFT_SPRITE,
+  MUG_TILTED_A_SPRITE,
+  MUG_STEAM_SPRITE,
+  MUG_EMPTY_SPRITE,
+  DOOR_A_SPRITE,
+  DOOR_B_SPRITE,
+  DOOR_VERTICAL_SPRITE,
+} from '../sprites/spriteData-kitchen.js'
+
+export const KITCHEN_CATALOG_ENTRIES: CatalogEntryWithCategory[] = [
+  { type: 'coffee_machine_b',   label: 'Espresso Machine',   footprintW: 1, footprintH: 2, sprite: COFFEE_MACHINE_B_SPRITE,   isDesk: false, category: 'misc' },
+  { type: 'microwave_a',        label: 'Microwave',          footprintW: 1, footprintH: 1, sprite: MICROWAVE_A_SPRITE,        isDesk: false, category: 'misc' },
+  { type: 'microwave_b',        label: 'Microwave B',        footprintW: 1, footprintH: 1, sprite: MICROWAVE_B_SPRITE,        isDesk: false, category: 'misc' },
+  { type: 'fridge_a',           label: 'Fridge',             footprintW: 1, footprintH: 2, sprite: FRIDGE_A_SPRITE,           isDesk: false, category: 'misc' },
+  { type: 'fridge_b',           label: 'Fridge B',           footprintW: 1, footprintH: 2, sprite: FRIDGE_B_SPRITE,           isDesk: false, category: 'misc' },
+  { type: 'water_dispenser_l',  label: 'Water Dispenser L',  footprintW: 1, footprintH: 2, sprite: WATER_DISPENSER_L_SPRITE,  isDesk: false, category: 'misc' },
+  { type: 'water_dispenser_r',  label: 'Water Dispenser R',  footprintW: 1, footprintH: 2, sprite: WATER_DISPENSER_R_SPRITE,  isDesk: false, category: 'misc' },
+  { type: 'mug_front',          label: 'Yellow Mug',         footprintW: 1, footprintH: 1, sprite: MUG_FRONT_SPRITE,          isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'mug_right',          label: 'Mug (right)',        footprintW: 1, footprintH: 1, sprite: MUG_RIGHT_SPRITE,          isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'mug_left',           label: 'Mug (left)',         footprintW: 1, footprintH: 1, sprite: MUG_LEFT_SPRITE,           isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'mug_tilted',         label: 'Tipped Mug',         footprintW: 1, footprintH: 1, sprite: MUG_TILTED_A_SPRITE,       isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'mug_steam',          label: 'Mug w/ Steam',       footprintW: 1, footprintH: 1, sprite: MUG_STEAM_SPRITE,          isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'mug_empty',          label: 'Empty Mug',          footprintW: 1, footprintH: 1, sprite: MUG_EMPTY_SPRITE,          isDesk: false, category: 'decor', canPlaceOnSurfaces: true },
+  { type: 'door_a',             label: 'Door',               footprintW: 1, footprintH: 2, sprite: DOOR_A_SPRITE,             isDesk: false, category: 'misc' },
+  { type: 'door_b',             label: 'Glass Door',         footprintW: 1, footprintH: 2, sprite: DOOR_B_SPRITE,             isDesk: false, category: 'misc' },
+  { type: 'door_vertical',      label: 'Sliding Door',       footprintW: 2, footprintH: 1, sprite: DOOR_VERTICAL_SPRITE,      isDesk: false, category: 'misc' },
+]
