@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import type { AgentState } from './types.js';
+import type { AgentState, ExternalAgent } from './types.js';
 import {
 	launchNewTerminal,
 	removeAgent,
@@ -342,10 +342,82 @@ export class PixelAgentsViewProvider implements vscode.WebviewViewProvider {
 				this.jsonlPollTimers, this.persistAgents,
 			);
 		}
+		// Clean up external agents
+		for (const id of [...this.externalAgents.keys()]) {
+			this.webview?.postMessage({ type: 'agentClosed', id });
+		}
+		this.externalAgents.clear();
 		for (const timer of this.projectScanTimers.values()) {
 			clearInterval(timer);
 		}
 		this.projectScanTimers.clear();
+	}
+
+	// External agent management (for HTTP API integration)
+	private externalAgents = new Map<number, ExternalAgent>();
+	private nextExternalId = { current: -1 };
+
+	createExternalAgent(name: string, project?: string): number {
+		const id = this.nextExternalId.current--;
+		const agent: ExternalAgent = {
+			id,
+			name,
+			project,
+			status: 'idle',
+		};
+		this.externalAgents.set(id, agent);
+		this.webview?.postMessage({ type: 'agentCreated', id, folderName: name });
+		console.log(`[Pixel Agents] External agent created: ${name} (id: ${id})`);
+		return id;
+	}
+
+	removeExternalAgent(id: number): void {
+		if (this.externalAgents.has(id)) {
+			this.externalAgents.delete(id);
+			this.webview?.postMessage({ type: 'agentClosed', id });
+			console.log(`[Pixel Agents] External agent removed: ${id}`);
+		}
+	}
+
+	updateExternalAgent(id: number, updates: { status?: string; tool?: string; message?: string }): void {
+		const agent = this.externalAgents.get(id);
+		if (agent) {
+			if (updates.status) {
+				agent.status = updates.status as ExternalAgent['status'];
+				this.webview?.postMessage({ type: 'agentStatus', id, status: agent.status });
+			}
+			if (updates.tool) {
+				agent.currentTool = updates.tool;
+				this.webview?.postMessage({
+					type: 'agentToolStart',
+					id,
+					toolId: updates.tool,
+					permissionWait: updates.status === 'permission',
+				});
+			}
+			if (updates.message) {
+				agent.currentMessage = updates.message;
+			}
+		}
+	}
+
+	handleExternalEvent(event: { id?: number; name?: string; project?: string; status?: string; tool?: string; message?: string }): number {
+		// Create agent if name provided and no ID
+		if (event.name && !event.id) {
+			return this.createExternalAgent(event.name, event.project);
+		}
+		// Update existing agent
+		if (event.id && (event.status || event.tool)) {
+			this.updateExternalAgent(event.id, event);
+		}
+		// Remove agent if status is 'idle' and no tool
+		if (event.id === 0 && event.status === 'idle') {
+			// Remove all external agents
+			for (const id of this.externalAgents.keys()) {
+				this.removeExternalAgent(id);
+			}
+		}
+		return event.id || 0;
 	}
 }
 

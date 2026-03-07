@@ -19,6 +19,16 @@ export interface AgentState {
 	folderName?: string;
 }
 
+/** External agent created via HTTP API (not tied to a terminal) */
+export interface ExternalAgent {
+	id: number;
+	name: string;
+	project?: string;
+	status: 'active' | 'waiting' | 'permission' | 'idle';
+	currentTool?: string;
+	currentMessage?: string;
+}
+
 export interface PersistedAgent {
 	id: number;
 	terminalName: string;
